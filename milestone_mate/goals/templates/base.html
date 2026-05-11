@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Milestone Mate{% endblock %}</title>
+  <style>
+    body { font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 0 16px; }
+    header { padding: 16px 0; border-bottom: 1px solid #eee; }
+    nav a { margin-right: 12px; }
+    main { padding: 16px 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="{% url 'list_goals' %}">Goals</a>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
+

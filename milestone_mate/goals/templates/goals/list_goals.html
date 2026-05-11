@@ -1,0 +1,515 @@
+{% extends 'goals/base.html' %}
+
+{% block title %}Goals{% endblock %}
+
+{% block content %}
+<!-- Google Font: Poppins -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #FAFAF9;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --border: #E7E5E4;
+    --rowHover: #F7F6F3;
+    --active: #F1F0EF;
+    --shadow: rgba(0, 0, 0, 0.04);
+  }
+
+  .gm-page {
+    background: var(--bg);
+    padding: 5rem 2.5rem;
+  }
+
+  .gm-title {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-weight: 700;
+    font-size: 30px;
+    color: var(--text);
+    margin: 0 0 1.25rem 0;
+    letter-spacing: -0.02em;
+  }
+
+  .gm-tabs {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .gm-tab {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    border-radius: 9999px;
+    padding: .45rem .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    gap: .5rem;
+    align-items: center;
+  }
+
+  .gm-tab[aria-selected="true"] {
+    background: var(--active);
+  }
+
+  .gm-grid {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  .gm-list {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 0 var(--shadow);
+  }
+
+  .gm-row {
+    display: grid;
+    grid-template-columns: 32px 1.2fr 2fr 110px 120px;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 140ms ease;
+  }
+
+  .gm-row:last-child {
+    border-bottom: none;
+  }
+
+  .gm-row:hover {
+    background: var(--rowHover);
+  }
+
+  .gm-row.dim {
+    opacity: 0.6;
+  }
+
+  .gm-check {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+  }
+
+  .gm-check input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    opacity: 0;
+    position: absolute;
+  }
+
+  .gm-check .tick {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--text);
+    transform: scale(0);
+    transition: transform 120ms ease;
+  }
+
+  .gm-row[data-completed="true"] .gm-check .tick {
+    transform: scale(1);
+  }
+
+  .gm-titleCell {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gm-row[data-completed="true"] .gm-titleCell {
+    text-decoration: line-through;
+  }
+
+  .gm-descCell {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .gm-attachBtn {
+    justify-self: end;
+    width: 44px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 120ms ease, opacity 120ms ease;
+  }
+
+  .gm-attachBtn:hover {
+    background: var(--rowHover);
+  }
+
+  .gm-attachBtn.dimmed {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .gm-dateCell {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .gm-addRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 14px 16px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+  }
+
+  .gm-addBtn {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-weight: 600;
+    color: #2b2b2b;
+    cursor: pointer;
+  }
+
+  .gm-addBtn span {
+    color: #6b7280;
+    font-weight: 600;
+  }
+
+  .gm-inlineForm {
+    padding: 14px 16px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+
+  .gm-inlineForm.show {
+    display: block;
+  }
+
+  .gm-formGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-width: 760px;
+  }
+
+  .gm-label {
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .gm-input,
+  .gm-textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  }
+
+  .gm-textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .gm-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 6px;
+  }
+
+  .gm-primary {
+    background: var(--text);
+    color: #fff;
+    border: 1px solid var(--text);
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .gm-cancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .gm-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 0 0 0;
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  }
+
+  .gm-pageLink {
+    border: 1px solid var(--border);
+    padding: 7px 10px;
+    border-radius: 10px;
+    background: #fff;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .gm-pageLink.active {
+    background: var(--active);
+  }
+
+  /* Minimal month-picker styling */
+  .gm-monthWrap {
+    margin-left: .25rem;
+    display: none;
+  }
+
+  .gm-tabs[data-active="month"] .gm-monthWrap {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .gm-monthInput {
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    padding: .35rem .7rem;
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background: #fff;
+  }
+
+  /* Tooltip */
+  .gm-tooltip {
+    position: fixed;
+    z-index: 9999;
+    background: rgba(26, 26, 26, 0.92);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    font-size: 13px;
+    max-width: 320px;
+    display: none;
+  }
+</style>
+
+<div class="gm-page">
+  <div class="gm-grid">
+    <h1 class="gm-title">Goals</h1>
+
+    <div class="gm-tabs" id="gmTabs" data-active="{{ active_filter|default:'year' }}">
+      <button type="button" class="gm-tab" data-filter="day" aria-selected="false">📅 Day</button>
+      <button type="button" class="gm-tab" data-filter="month" aria-selected="false">🗓️ Month</button>
+      <button type="button" class="gm-tab" data-filter="year" aria-selected="true">📆 Year</button>
+
+
+
+
+      <span class="gm-monthWrap" aria-hidden="true">
+        <input id="gmMonth" class="gm-monthInput" type="month" value="{{ selected_month|default:'' }}" />
+      </span>
+    </div>
+
+    <div class="gm-list" role="list">
+      {% if goals %}
+      {% for g in goals %}
+      <div class="gm-row" role="listitem" data-completed="{{ g.is_completed|yesno:'true,false' }}">
+        <div class="gm-check" aria-label="Toggle complete" title="Completion is display-only">
+          <span class="tick"></span>
+        </div>
+
+        <div class="gm-titleCell">{{ g.name }}</div>
+
+        <div class="gm-descCell" title="{{ g.description }}">{{ g.description }}</div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          {# Project has no attachment field yet; dim the button when absent #}
+          {% if g.attachment_url or g.attachment_name %}
+          <button class="gm-attachBtn" type="button" data-attachment="{{ g.attachment_name|default:'Attachment' }}"
+            aria-label="Attachment">
+            📎
+          </button>
+          {% else %}
+          <button class="gm-attachBtn dimmed" type="button" disabled aria-label="No attachment">
+            📎
+          </button>
+          {% endif %}
+        </div>
+
+        <div class="gm-dateCell">
+          {{ g.target_date }}
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="gm-row">
+        <div
+          style="grid-column: 1 / -1; font-family: 'Poppins', sans-serif; color: var(--muted); font-weight: 600; padding: 8px 0;">
+          No goals found.</div>
+      </div>
+      {% endif %}
+
+      <!-- Add row -->
+      <div class="gm-addRow">
+        <div class="gm-addBtn" id="gmOpenAdd" role="button" tabindex="0">
+          <span>＋</span> Add a goal
+        </div>
+      </div>
+
+      <!-- Inline add form (no backend wired yet; UI-only) -->
+      <form class="gm-inlineForm" id="gmAddForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="gm-formGrid">
+          <div>
+            <div class="gm-label">Title</div>
+            <input class="gm-input" type="text" name="title" placeholder="e.g., Finish project" />
+          </div>
+          <div>
+            <div class="gm-label">Description</div>
+            <textarea class="gm-textarea" name="description" placeholder="Add details..."></textarea>
+          </div>
+          <div>
+            <div class="gm-label">Target Date</div>
+
+            <input class="gm-input" type="date" name="target_date" />
+          </div>
+          <div>
+            <div class="gm-label">Attachment</div>
+            <input class="gm-input" type="file" name="attachment" />
+          </div>
+
+          <div class="gm-actions">
+            <button class="gm-primary" type="submit">Save</button>
+            <button class="gm-cancel" type="button" id="gmCancelAdd">Cancel</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {# Pagination UI (works only if view provides page_obj) #}
+    {% if page_obj %}
+    <div class="gm-pagination" aria-label="Pagination">
+      {% if page_obj.has_previous %}
+      <a class="gm-pageLink" href="?page={{ page_obj.previous_page_number }}">
+        < {{ page_obj.previous_page_number }}</a>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+          {% if num == page_obj.number %}
+          <span class="gm-pageLink active">{{ num }}</span>
+          {% else %}
+          {% if num >= page_obj.number|add:-3 and num <= page_obj.number|add:3 %} <a class="gm-pageLink"
+            href="?page={{ num }}">{{ num }}
+      </a>
+      {% endif %}
+      {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <a class="gm-pageLink" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }} ></a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="gm-tooltip" id="gmTip"></div>
+
+<script>
+  (function () {
+    const tabs = document.getElementById('gmTabs');
+    const monthInput = document.getElementById('gmMonth');
+    const openAdd = document.getElementById('gmOpenAdd');
+    const addForm = document.getElementById('gmAddForm');
+    const cancelAdd = document.getElementById('gmCancelAdd');
+    const tip = document.getElementById('gmTip');
+
+    function setActive(filter) {
+      tabs.dataset.active = filter;
+      [...tabs.querySelectorAll('.gm-tab')].forEach(btn => {
+        const sel = btn.getAttribute('data-filter') === filter;
+        btn.setAttribute('aria-selected', sel ? 'true' : 'false');
+      });
+    }
+
+    tabs && tabs.addEventListener('click', (e) => {
+      const btn = e.target.closest('.gm-tab');
+      if (!btn) return;
+      setActive(btn.getAttribute('data-filter'));
+    });
+
+    // Month picker behavior (UI only unless you wire server-side filtering)
+    if (monthInput) {
+      monthInput.addEventListener('change', () => {
+        // Keep UI consistent; actual filtering requires view changes.
+        setActive('month');
+      });
+    }
+
+    if (openAdd) {
+      openAdd.addEventListener('click', () => {
+        addForm && addForm.classList.add('show');
+      });
+      openAdd.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') addForm && addForm.classList.add('show');
+      });
+    }
+
+    if (cancelAdd) {
+      cancelAdd.addEventListener('click', () => {
+        addForm && addForm.classList.remove('show');
+      });
+    }
+
+    // Attachment tooltip
+    document.querySelectorAll('.gm-attachBtn[data-attachment]').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const text = btn.getAttribute('data-attachment');
+        if (!text) return;
+        tip.textContent = text;
+        tip.style.display = 'block';
+        tip.style.left = (e.clientX + 12) + 'px';
+        tip.style.top = (e.clientY + 12) + 'px';
+        clearTimeout(btn.__t);
+        btn.__t = setTimeout(() => tip.style.display = 'none', 2200);
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (tip && tip.style.display === 'block') {
+        if (!e.target.closest('.gm-attachBtn')) tip.style.display = 'none';
+      }
+    });
+  })();
+</script>
+{% endblock %}

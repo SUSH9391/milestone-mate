@@ -4,11 +4,321 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Milestone Mate{% endblock %}</title>
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0 16px; }
-    header { padding: 16px 0; border-bottom: 1px solid #eee; }
-    nav a { margin-right: 12px; }
-    main { padding: 16px 0; }
+    :root {
+      --font-main: 'Poppins', sans-serif;
+      --bg: #FAFAF9;
+      --text-primary: #1a1a1a;
+      --text-muted: #6b7280;
+      --hover-bg: #F7F6F3;
+      --active-bg: #F1F0EF;
+      --border: #e5e5e5;
+      --accent: #2563eb;
+      --shadow: rgba(0, 0, 0, 0.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg);
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    header {
+      padding: 16px 0;
+      border-bottom: 1px solid #eee;
+      background: #fff;
+    }
+
+    nav a {
+      margin-right: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+
+    nav a:hover {
+      background: var(--hover-bg);
+    }
+
+    main { min-height: 70vh; }
+
+    .page-wrapper { padding: 5rem 2.5rem; }
+
+    /* Shared Notion-inspired utility classes */
+    .notion-row {
+      display: grid;
+      grid-template-columns: 32px 1.2fr 2fr 110px 120px;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 140ms ease;
+    }
+
+    .notion-row:last-child { border-bottom: none; }
+    .notion-row:hover { background: var(--hover-bg); }
+
+    .goal-title {
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .goal-description {
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: .35rem .65rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 12px;
+      margin-left: .75rem;
+    }
+
+    .badge-completed { background: #dcfce7; color: #166534; }
+    .badge-inprogress { background: #e5e7eb; color: #374151; }
+
+    .btn-back {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .btn-back:hover { background: var(--hover-bg); }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 0 0 0;
+      font-family: var(--font-main);
+    }
+
+    .pagination a,
+    .pagination span {
+      border: 1px solid var(--border);
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: #fff;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+
+    .pagination span.active { background: var(--active-bg); }
+
+    /* Detail page styling */
+    .detail-header { margin-bottom: 1rem; }
+    .goal-detail-title {
+      font-size: 36px;
+      margin: .75rem 0 0;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+
+    .goal-detail-date {
+      margin: 1rem 0;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .goal-detail-description {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+    }
+
+    .goal-detail-attachment { margin-top: 16px; }
+    .attachment-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .attachment-link:hover { background: var(--hover-bg); }
+
+    /* Keep legacy gm-* selectors from list page while we migrate */
+    .gm-page { background: var(--bg); padding: 5rem 2.5rem; }
+    .gm-title { font-family: var(--font-main); font-weight: 800; font-size: 30px; margin: 0 0 1.25rem 0; letter-spacing: -0.02em; color: var(--text-primary); }
+    .gm-grid { width: 100%; max-width: 980px; margin: 0 auto; }
+
+    .gm-tabs { display: flex; gap: .5rem; align-items: center; margin-bottom: 1.25rem; }
+    .gm-tab {
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-primary);
+      border-radius: 9999px;
+      padding: .45rem .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      gap: .5rem;
+      align-items: center;
+      font-family: var(--font-main);
+    }
+    .gm-tab[aria-selected="true"] { background: var(--active-bg); }
+
+    .gm-monthWrap { margin-left: .25rem; display: none; }
+    .gm-tabs[data-active="month"] .gm-monthWrap { display: inline-flex; align-items: center; gap: .5rem; }
+    .gm-monthInput {
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      padding: .35rem .7rem;
+      font-family: var(--font-main);
+      background: #fff;
+    }
+
+    .gm-list { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 1px 0 var(--shadow); }
+
+    .gm-row {
+      display: grid;
+      grid-template-columns: 32px 1.2fr 2fr 110px 120px;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 140ms ease, opacity 140ms ease;
+    }
+    .gm-row:last-child { border-bottom: none; }
+    .gm-row:hover { background: var(--hover-bg); }
+
+    .gm-row.dim { opacity: 0.6; }
+
+    .gm-check {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .gm-check input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+      opacity: 0;
+      position: absolute;
+    }
+
+    .gm-check .tick {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--text-primary);
+      transform: scale(0);
+      transition: transform 120ms ease;
+    }
+
+    .gm-row[data-completed="true"] .gm-check .tick { transform: scale(1); }
+
+    .gm-titleCell { font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gm-row[data-completed="true"] .gm-titleCell { text-decoration: line-through; }
+    .gm-descCell { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-main); }
+
+    .gm-attachBtn {
+      justify-self: end;
+      width: 44px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background 120ms ease, opacity 120ms ease;
+    }
+
+    .gm-attachBtn:hover { background: var(--hover-bg); }
+    .gm-attachBtn.dimmed { opacity: 0.35; cursor: default; }
+
+    .gm-dateCell { font-size: 12px; color: var(--text-muted); text-align: right; white-space: nowrap; font-family: var(--font-main); }
+
+    .gm-addRow { display: flex; gap: 10px; align-items: center; padding: 14px 16px; background: #fff; border-top: 1px solid var(--border); }
+    .gm-addBtn { font-weight: 600; color: #2b2b2b; cursor: pointer; font-family: var(--font-main); }
+    .gm-addBtn span { color: #6b7280; font-weight: 600; }
+
+    .gm-inlineForm { padding: 14px 16px; background: #fff; border-top: 1px solid var(--border); display: none; }
+    .gm-inlineForm.show { display: block; }
+
+    .gm-formGrid { display: grid; grid-template-columns: 1fr; gap: 10px; max-width: 760px; }
+
+    .gm-label { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; font-family: var(--font-main); }
+
+    .gm-input, .gm-textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-family: var(--font-main);
+    }
+
+    .gm-textarea { min-height: 90px; resize: vertical; }
+
+    .gm-actions { display: flex; gap: 10px; align-items: center; margin-top: 6px; }
+
+    .gm-primary { background: var(--text-primary); color: #fff; border: 1px solid var(--text-primary); padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 700; font-family: var(--font-main); }
+    .gm-cancel { background: transparent; border: 1px solid var(--border); padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600; font-family: var(--font-main); }
+
+    .gm-pagination { display: flex; justify-content: center; gap: 6px; padding: 14px 0 0 0; font-family: var(--font-main); }
+    .gm-pageLink { border: 1px solid var(--border); padding: 7px 10px; border-radius: 10px; background: #fff; font-weight: 600; color: var(--text-primary); text-decoration: none; }
+    .gm-pageLink.active { background: var(--active-bg); }
+
+    .gm-tooltip {
+      position: fixed;
+      z-index: 9999;
+      background: rgba(26, 26, 26, 0.92);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-family: var(--font-main);
+      font-size: 13px;
+      max-width: 320px;
+      display: none;
+    }
+
   </style>
 </head>
 <body>
@@ -23,4 +333,5 @@
   </main>
 </body>
 </html>
+
 

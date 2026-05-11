@@ -3,325 +3,6 @@
 {% block title %}Goals{% endblock %}
 
 {% block content %}
-<!-- Google Font: Poppins -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
-<style>
-  :root {
-    --bg: #FAFAF9;
-    --text: #1a1a1a;
-    --muted: #6b7280;
-    --border: #E7E5E4;
-    --rowHover: #F7F6F3;
-    --active: #F1F0EF;
-    --shadow: rgba(0, 0, 0, 0.04);
-  }
-
-  .gm-page {
-    background: var(--bg);
-    padding: 5rem 2.5rem;
-  }
-
-  .gm-title {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    font-weight: 700;
-    font-size: 30px;
-    color: var(--text);
-    margin: 0 0 1.25rem 0;
-    letter-spacing: -0.02em;
-  }
-
-  .gm-tabs {
-    display: flex;
-    gap: .5rem;
-    align-items: center;
-    margin-bottom: 1.25rem;
-  }
-
-  .gm-tab {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    border: 1px solid var(--border);
-    background: #fff;
-    color: var(--text);
-    border-radius: 9999px;
-    padding: .45rem .75rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: inline-flex;
-    gap: .5rem;
-    align-items: center;
-  }
-
-  .gm-tab[aria-selected="true"] {
-    background: var(--active);
-  }
-
-  .gm-grid {
-    width: 100%;
-    max-width: 980px;
-    margin: 0 auto;
-  }
-
-  .gm-list {
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    background: #fff;
-    box-shadow: 0 1px 0 var(--shadow);
-  }
-
-  .gm-row {
-    display: grid;
-    grid-template-columns: 32px 1.2fr 2fr 110px 120px;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-    transition: background 140ms ease;
-  }
-
-  .gm-row:last-child {
-    border-bottom: none;
-  }
-
-  .gm-row:hover {
-    background: var(--rowHover);
-  }
-
-  .gm-row.dim {
-    opacity: 0.6;
-  }
-
-  .gm-check {
-    width: 18px;
-    height: 18px;
-    border: 1.5px solid var(--border);
-    border-radius: 4px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #fff;
-  }
-
-  .gm-check input {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    opacity: 0;
-    position: absolute;
-  }
-
-  .gm-check .tick {
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-    background: var(--text);
-    transform: scale(0);
-    transition: transform 120ms ease;
-  }
-
-  .gm-row[data-completed="true"] .gm-check .tick {
-    transform: scale(1);
-  }
-
-  .gm-titleCell {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .gm-row[data-completed="true"] .gm-titleCell {
-    text-decoration: line-through;
-  }
-
-  .gm-descCell {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    color: var(--muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .gm-attachBtn {
-    justify-self: end;
-    width: 44px;
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: #fff;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    transition: background 120ms ease, opacity 120ms ease;
-  }
-
-  .gm-attachBtn:hover {
-    background: var(--rowHover);
-  }
-
-  .gm-attachBtn.dimmed {
-    opacity: 0.35;
-    cursor: default;
-  }
-
-  .gm-dateCell {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    font-size: 12px;
-    color: var(--muted);
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .gm-addRow {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    padding: 14px 16px;
-    background: #fff;
-    border-top: 1px solid var(--border);
-  }
-
-  .gm-addBtn {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    font-weight: 600;
-    color: #2b2b2b;
-    cursor: pointer;
-  }
-
-  .gm-addBtn span {
-    color: #6b7280;
-    font-weight: 600;
-  }
-
-  .gm-inlineForm {
-    padding: 14px 16px;
-    background: #fff;
-    border-top: 1px solid var(--border);
-    display: none;
-  }
-
-  .gm-inlineForm.show {
-    display: block;
-  }
-
-  .gm-formGrid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    max-width: 760px;
-  }
-
-  .gm-label {
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .gm-input,
-  .gm-textarea {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 12px;
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  }
-
-  .gm-textarea {
-    min-height: 90px;
-    resize: vertical;
-  }
-
-  .gm-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 6px;
-  }
-
-  .gm-primary {
-    background: var(--text);
-    color: #fff;
-    border: 1px solid var(--text);
-    padding: 10px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-  }
-
-  .gm-cancel {
-    background: transparent;
-    border: 1px solid var(--border);
-    padding: 10px 14px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 600;
-  }
-
-  .gm-pagination {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    padding: 14px 0 0 0;
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  }
-
-  .gm-pageLink {
-    border: 1px solid var(--border);
-    padding: 7px 10px;
-    border-radius: 10px;
-    background: #fff;
-    font-weight: 600;
-    color: var(--text);
-    text-decoration: none;
-  }
-
-  .gm-pageLink.active {
-    background: var(--active);
-  }
-
-  /* Minimal month-picker styling */
-  .gm-monthWrap {
-    margin-left: .25rem;
-    display: none;
-  }
-
-  .gm-tabs[data-active="month"] .gm-monthWrap {
-    display: inline-flex;
-    align-items: center;
-    gap: .5rem;
-  }
-
-  .gm-monthInput {
-    border: 1px solid var(--border);
-    border-radius: 9999px;
-    padding: .35rem .7rem;
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    background: #fff;
-  }
-
-  /* Tooltip */
-  .gm-tooltip {
-    position: fixed;
-    z-index: 9999;
-    background: rgba(26, 26, 26, 0.92);
-    color: #fff;
-    padding: 10px 12px;
-    border-radius: 12px;
-    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    font-size: 13px;
-    max-width: 320px;
-    display: none;
-  }
-</style>
 
 <div class="gm-page">
   <div class="gm-grid">
@@ -343,12 +24,15 @@
     <div class="gm-list" role="list">
       {% if goals %}
       {% for g in goals %}
-      <div class="gm-row" role="listitem" data-completed="{{ g.is_completed|yesno:'true,false' }}">
-        <div class="gm-check" aria-label="Toggle complete" title="Completion is display-only">
-          <span class="tick"></span>
+<div class="gm-row" role="listitem" data-goal-id="{{ g.id }}" data-completed="{{ g.is_completed|yesno:'true,false' }}" style="cursor:pointer;" aria-label="Open goal detail">
+
+        <div class="gm-check" title="Toggle complete">
+          <input class="gm-check-input" type="checkbox" aria-label="Toggle complete" {% if g.is_completed %}checked{% endif %} />
+          <span class="tick" aria-hidden="true"></span>
         </div>
 
         <div class="gm-titleCell">{{ g.name }}</div>
+
 
         <div class="gm-descCell" title="{{ g.description }}">{{ g.description }}</div>
 
@@ -454,6 +138,20 @@
     const cancelAdd = document.getElementById('gmCancelAdd');
     const tip = document.getElementById('gmTip');
 
+    function getCookie(name) {
+      const cookies = document.cookie ? document.cookie.split(';') : [];
+      for (let c of cookies) {
+        const cookie = c.trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          return decodeURIComponent(cookie.substring(name.length + 1));
+        }
+      }
+      return null;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+
     function setActive(filter) {
       tabs.dataset.active = filter;
       [...tabs.querySelectorAll('.gm-tab')].forEach(btn => {
@@ -505,11 +203,54 @@
       });
     });
 
+    // Checkbox AJAX toggle (no full page reload)
+    document.querySelectorAll('.gm-row[data-goal-id]').forEach(row => {
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      if (!checkbox) return;
+
+      checkbox.addEventListener('click', async (e) => {
+        e.stopPropagation();
+
+        const goalId = row.getAttribute('data-goal-id');
+        const url = `{% url 'toggle_goal' 0 %}`.replace('/0/','/' + goalId + '/');
+
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({})
+          });
+
+          const data = await res.json();
+          if (!data || typeof data.is_completed === 'undefined') return;
+
+          row.dataset.completed = data.is_completed ? 'true' : 'false';
+          row.style.opacity = data.is_completed ? '0.6' : '1';
+
+          // strike-through is controlled by dataset-completed attribute in CSS
+          row.setAttribute('data-completed', data.is_completed ? 'true' : 'false');
+          checkbox.checked = data.is_completed;
+        } catch (err) {
+          console.error('Toggle failed', err);
+        }
+      });
+
+      // initial opacity from server state
+      const completed = row.getAttribute('data-completed') === 'true';
+      row.style.opacity = completed ? '0.6' : '1';
+    });
+
+
+
     document.addEventListener('click', (e) => {
       if (tip && tip.style.display === 'block') {
         if (!e.target.closest('.gm-attachBtn')) tip.style.display = 'none';
       }
     });
   })();
+
 </script>
 {% endblock %}

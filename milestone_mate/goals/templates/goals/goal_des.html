@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ goal.name }}{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <div class="detail-header">
+    <a class="btn-back" href="{% url 'list_goals' %}">&larr; Back to Goals</a>
+    <h1 class="goal-detail-title">{{ goal.name }}</h1>
+
+    {% if goal.is_completed %}
+      <span class="badge badge-completed">Completed</span>
+    {% else %}
+      <span class="badge badge-inprogress">In Progress</span>
+    {% endif %}
+  </div>
+
+  <div class="goal-detail-date">
+    Due: {{ goal.target_date|date:"l, d M Y" }}
+  </div>
+
+  <div class="goal-detail-description">{{ goal.description }}</div>
+
+  {# Attachment support (only if your model is later extended to include it) #}
+  {% if goal.attachment_url or goal.attachment_name %}
+    <div class="goal-detail-attachment">
+      <a class="attachment-link" href="{{ goal.attachment_url }}" target="_blank" rel="noopener">
+        <span class="attachment-icon">📎</span>
+        {{ goal.attachment_name|default:'Attachment' }}
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+

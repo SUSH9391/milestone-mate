@@ -1,20 +1,19 @@
-{% extends 'base.html' %}
-
-{% block title %}Goals{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Goals{% endblock %} {% block content %}
 
 <div class="gm-page">
   <div class="gm-grid">
     <h1 class="gm-title">Goals</h1>
 
     <div class="gm-tabs" id="gmTabs" data-active="{{ active_filter|default:'year' }}">
-      <button type="button" class="gm-tab" data-filter="day" aria-selected="false">📅 Day</button>
-      <button type="button" class="gm-tab" data-filter="month" aria-selected="false">🗓️ Month</button>
-      <button type="button" class="gm-tab" data-filter="year" aria-selected="true">📆 Year</button>
-
-
-
+      <button type="button" class="gm-tab" data-filter="day" aria-selected="false">
+        📅 Day
+      </button>
+      <button type="button" class="gm-tab" data-filter="month" aria-selected="false">
+        🗓️ Month
+      </button>
+      <button type="button" class="gm-tab" data-filter="year" aria-selected="true">
+        📆 Year
+      </button>
 
       <span class="gm-monthWrap" aria-hidden="true">
         <input id="gmMonth" class="gm-monthInput" type="month" value="{{ selected_month|default:'' }}" />
@@ -23,44 +22,90 @@
 
     <div class="gm-list" role="list">
       {% if goals %}
-      {% for g in goals %}
-<div class="gm-row" role="listitem" data-goal-id="{{ g.id }}" data-completed="{{ g.is_completed|yesno:'true,false' }}" style="cursor:pointer;" aria-label="Open goal detail">
-
-        <div class="gm-check" title="Toggle complete">
-          <input class="gm-check-input" type="checkbox" aria-label="Toggle complete" {% if g.is_completed %}checked{% endif %} />
-          <span class="tick" aria-hidden="true"></span>
-        </div>
-
-        <div class="gm-titleCell">{{ g.name }}</div>
-
-
-        <div class="gm-descCell" title="{{ g.description }}">{{ g.description }}</div>
-
-        <div style="display:flex; justify-content:flex-end;">
-          {# Project has no attachment field yet; dim the button when absent #}
-          {% if g.attachment_url or g.attachment_name %}
-          <button class="gm-attachBtn" type="button" data-attachment="{{ g.attachment_name|default:'Attachment' }}"
-            aria-label="Attachment">
-            📎
-          </button>
-          {% else %}
-          <button class="gm-attachBtn dimmed" type="button" disabled aria-label="No attachment">
-            📎
-          </button>
-          {% endif %}
-        </div>
-
-        <div class="gm-dateCell">
-          {{ g.target_date }}
-        </div>
-      </div>
-      {% endfor %}
-      {% else %}
-      <div class="gm-row">
+        {% for g in goals %}
         <div
-          style="grid-column: 1 / -1; font-family: 'Poppins', sans-serif; color: var(--muted); font-weight: 600; padding: 8px 0;">
-          No goals found.</div>
-      </div>
+          class="gm-row"
+          role="listitem"
+          data-goal-id="{{ g.id }}"
+          data-completed="{{ g.is_completed|yesno:'true,false' }}"
+          style="cursor: pointer"
+          aria-label="Open goal detail"
+        >
+          <div class="gm-check" title="Toggle complete">
+            <input
+              class="gm-check-input"
+              type="checkbox"
+              aria-label="Toggle complete"
+              {% if g.is_completed %}checked{% endif %}
+            />
+            <span class="tick" aria-hidden="true"></span>
+          </div>
+
+          <div class="gm-titleCell">{{ g.name }}</div>
+
+          <div class="gm-descCell" title="{{ g.description }}">
+            {{ g.description }}
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px">
+            {# Attachment #}
+            {% if g.attachment_url or g.attachment_name %}
+              <button
+                class="gm-attachBtn"
+                type="button"
+                data-attachment="{{ g.attachment_name|default:'Attachment' }}"
+                aria-label="Attachment"
+              >
+                📎
+              </button>
+            {% else %}
+              <button
+                class="gm-attachBtn dimmed"
+                type="button"
+                disabled
+                aria-label="No attachment"
+              >
+                📎
+              </button>
+            {% endif %}
+
+            {# Delete goal (custom modal UX) #}
+            <form
+              method="POST"
+              action="{% url 'delete_goal' g.id %}"
+              class="gm-deleteForm"
+              data-delete-goal-id="{{ g.id }}"
+              onsubmit="return false;"
+            >
+              {% csrf_token %}
+              <button
+                type="button"
+                class="gm-deleteTrigger"
+                aria-label="Delete goal"
+                onclick="openDeleteModal(event, {{ g.id }});"
+              >
+                Delete
+              </button>
+            </form>
+          </div>
+
+          <div class="gm-dateCell">{{ g.target_date }}</div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="gm-row">
+          <div
+            style="
+              grid-column: 1 / -1;
+              font-family: Poppins, sans-serif;
+              color: var(--muted);
+              font-weight: 600;
+              padding: 8px 0;
+            "
+          >
+            No goals found.
+          </div>
+        </div>
       {% endif %}
 
       <!-- Add row -->
@@ -84,7 +129,6 @@
           </div>
           <div>
             <div class="gm-label">Target Date</div>
-
             <input class="gm-input" type="date" name="target_date" />
           </div>
           <div>
@@ -102,160 +146,237 @@
 
     {# Pagination UI (works only if view provides page_obj) #}
     {% if page_obj %}
-    <div class="gm-pagination" aria-label="Pagination">
-      {% if page_obj.has_previous %}
-      <a class="gm-pageLink" href="?page={{ page_obj.previous_page_number }}">
-        < {{ page_obj.previous_page_number }}</a>
-          {% endif %}
+      <div class="gm-pagination" aria-label="Pagination">
+        {% if page_obj.has_previous %}
+          <a class="gm-pageLink" href="?page={{ page_obj.previous_page_number }}">
+            ← {{ page_obj.previous_page_number }}
+          </a>
+        {% endif %}
 
-          {% for num in page_obj.paginator.page_range %}
+        {% for num in page_obj.paginator.page_range %}
           {% if num == page_obj.number %}
-          <span class="gm-pageLink active">{{ num }}</span>
+            <span class="gm-pageLink active">{{ num }}</span>
           {% else %}
-          {% if num >= page_obj.number|add:-3 and num <= page_obj.number|add:3 %} <a class="gm-pageLink"
-            href="?page={{ num }}">{{ num }}
-      </a>
-      {% endif %}
-      {% endif %}
-      {% endfor %}
+            {% if num >= page_obj.number|add:-3 and num <= page_obj.number|add:3 %}
+              <a class="gm-pageLink" href="?page={{ num }}">{{ num }}</a>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
 
-      {% if page_obj.has_next %}
-      <a class="gm-pageLink" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }} ></a>
-      {% endif %}
-    </div>
+        {% if page_obj.has_next %}
+          <a class="gm-pageLink" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }} →</a>
+        {% endif %}
+      </div>
     {% endif %}
   </div>
 </div>
 
 <div class="gm-tooltip" id="gmTip"></div>
 
+{# Custom delete modal (replaces browser confirm popup) #}
+<style>
+  .gm-modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .gm-modalOverlay.show {
+    display: flex;
+  }
+  .gm-modal {
+    background: white;
+    padding: 24px;
+    border-radius: 18px;
+    width: 360px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    font-family: Poppins, sans-serif;
+  }
+  .gm-modal h3 {
+    margin-top: 0;
+  }
+  .gm-modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .gm-cancelBtn,
+  .gm-deleteBtn {
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .gm-cancelBtn {
+    background: #f3f4f6;
+  }
+  .gm-deleteBtn {
+    background: #111827;
+    color: white;
+  }
+</style>
+
+<div class="gm-modalOverlay" id="deleteModal" aria-hidden="true">
+  <div class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <h3 id="deleteModalTitle">Delete Goal</h3>
+    <p>Are you sure you want to delete this goal?</p>
+
+    <div class="gm-modalActions">
+      <button class="gm-cancelBtn" type="button" onclick="closeDeleteModal(event)">Cancel</button>
+
+      <form id="deleteForm" method="POST">
+        {% csrf_token %}
+        <button type="submit" class="gm-deleteBtn">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
   (function () {
-    const tabs = document.getElementById('gmTabs');
-    const monthInput = document.getElementById('gmMonth');
-    const openAdd = document.getElementById('gmOpenAdd');
-    const addForm = document.getElementById('gmAddForm');
-    const cancelAdd = document.getElementById('gmCancelAdd');
-    const tip = document.getElementById('gmTip');
+    const tabs = document.getElementById("gmTabs");
+    const monthInput = document.getElementById("gmMonth");
+    const openAdd = document.getElementById("gmOpenAdd");
+    const addForm = document.getElementById("gmAddForm");
+    const cancelAdd = document.getElementById("gmCancelAdd");
+    const tip = document.getElementById("gmTip");
+
+    const deleteModal = document.getElementById("deleteModal");
+    const deleteForm = document.getElementById("deleteForm");
 
     function getCookie(name) {
-      const cookies = document.cookie ? document.cookie.split(';') : [];
+      const cookies = document.cookie ? document.cookie.split(";") : [];
       for (let c of cookies) {
         const cookie = c.trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        if (cookie.substring(0, name.length + 1) === name + "=") {
           return decodeURIComponent(cookie.substring(name.length + 1));
         }
       }
       return null;
     }
 
-    const csrftoken = getCookie('csrftoken');
-
+    const csrftoken = getCookie("csrftoken");
 
     function setActive(filter) {
       tabs.dataset.active = filter;
-      [...tabs.querySelectorAll('.gm-tab')].forEach(btn => {
-        const sel = btn.getAttribute('data-filter') === filter;
-        btn.setAttribute('aria-selected', sel ? 'true' : 'false');
+      [...tabs.querySelectorAll(".gm-tab")].forEach((btn) => {
+        const sel = btn.getAttribute("data-filter") === filter;
+        btn.setAttribute("aria-selected", sel ? "true" : "false");
       });
     }
 
-    tabs && tabs.addEventListener('click', (e) => {
-      const btn = e.target.closest('.gm-tab');
-      if (!btn) return;
-      setActive(btn.getAttribute('data-filter'));
-    });
+    tabs &&
+      tabs.addEventListener("click", (e) => {
+        const btn = e.target.closest(".gm-tab");
+        if (!btn) return;
+        setActive(btn.getAttribute("data-filter"));
+      });
 
-    // Month picker behavior (UI only unless you wire server-side filtering)
     if (monthInput) {
-      monthInput.addEventListener('change', () => {
-        // Keep UI consistent; actual filtering requires view changes.
-        setActive('month');
+      monthInput.addEventListener("change", () => {
+        setActive("month");
       });
     }
 
     if (openAdd) {
-      openAdd.addEventListener('click', () => {
-        addForm && addForm.classList.add('show');
+      openAdd.addEventListener("click", () => {
+        addForm && addForm.classList.add("show");
       });
-      openAdd.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') addForm && addForm.classList.add('show');
+      openAdd.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          addForm && addForm.classList.add("show");
+        }
       });
     }
 
     if (cancelAdd) {
-      cancelAdd.addEventListener('click', () => {
-        addForm && addForm.classList.remove('show');
+      cancelAdd.addEventListener("click", () => {
+        addForm && addForm.classList.remove("show");
       });
     }
 
-    // Attachment tooltip
-    document.querySelectorAll('.gm-attachBtn[data-attachment]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const text = btn.getAttribute('data-attachment');
-        if (!text) return;
-        tip.textContent = text;
-        tip.style.display = 'block';
-        tip.style.left = (e.clientX + 12) + 'px';
-        tip.style.top = (e.clientY + 12) + 'px';
-        clearTimeout(btn.__t);
-        btn.__t = setTimeout(() => tip.style.display = 'none', 2200);
+    document
+      .querySelectorAll(".gm-attachBtn[data-attachment]")
+      .forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const text = btn.getAttribute("data-attachment");
+          if (!text) return;
+          tip.textContent = text;
+          tip.style.display = "block";
+          tip.style.left = e.clientX + 12 + "px";
+          tip.style.top = e.clientY + 12 + "px";
+          clearTimeout(btn.__t);
+          btn.__t = setTimeout(() => (tip.style.display = "none"), 2200);
+        });
       });
-    });
 
-    // Row click => open goal detail (checkbox click is handled separately and stops propagation)
-    document.querySelectorAll('.gm-row[data-goal-id]').forEach(row => {
-      row.addEventListener('click', () => {
-        const goalId = row.getAttribute('data-goal-id');
-        window.location.href = `{% url 'goal_detail' 0 %}`.replace('/0/','/' + goalId + '/');
+    document.querySelectorAll(".gm-row[data-goal-id]").forEach((row) => {
+      row.addEventListener("click", () => {
+        const goalId = row.getAttribute("data-goal-id");
+        window.location.href = `{% url 'goal_detail' 0 %}`.replace("/0/", "/" + goalId + "/");
       });
 
       const checkbox = row.querySelector('input[type="checkbox"]');
       if (checkbox) {
-        checkbox.addEventListener('click', async (e) => {
+        checkbox.addEventListener("click", async (e) => {
           e.stopPropagation();
 
-          const goalId = row.getAttribute('data-goal-id');
-          const url = `{% url 'toggle_goal' 0 %}`.replace('/0/','/' + goalId + '/');
+          const goalId = row.getAttribute("data-goal-id");
+          const url = `{% url 'toggle_goal' 0 %}`.replace("/0/", "/" + goalId + "/");
 
           try {
             const res = await fetch(url, {
-              method: 'POST',
+              method: "POST",
               headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken,
               },
-              body: JSON.stringify({})
+              body: JSON.stringify({}),
             });
 
             const data = await res.json();
-            if (!data || typeof data.is_completed === 'undefined') return;
+            if (!data || typeof data.is_completed === "undefined") return;
 
-            row.dataset.completed = data.is_completed ? 'true' : 'false';
-            row.style.opacity = data.is_completed ? '0.6' : '1';
+            row.dataset.completed = data.is_completed ? "true" : "false";
+            row.style.opacity = data.is_completed ? "0.6" : "1";
 
-            row.setAttribute('data-completed', data.is_completed ? 'true' : 'false');
+            row.setAttribute("data-completed", data.is_completed ? "true" : "false");
             checkbox.checked = data.is_completed;
           } catch (err) {
-            console.error('Toggle failed', err);
+            console.error("Toggle failed", err);
           }
         });
       }
 
-      // initial opacity from server state
-      const completed = row.getAttribute('data-completed') === 'true';
-      row.style.opacity = completed ? '0.6' : '1';
+      const completed = row.getAttribute("data-completed") === "true";
+      row.style.opacity = completed ? "0.6" : "1";
     });
 
-
-
-
-    document.addEventListener('click', (e) => {
-      if (tip && tip.style.display === 'block') {
-        if (!e.target.closest('.gm-attachBtn')) tip.style.display = 'none';
+    document.addEventListener("click", (e) => {
+      if (tip && tip.style.display === "block") {
+        if (!e.target.closest(".gm-attachBtn")) tip.style.display = "none";
       }
     });
-  })();
 
+    // Expose for onclick handlers in the template
+    window.openDeleteModal = function (event, goalId) {
+      if (event) event.stopPropagation();
+
+      deleteForm.action = `{% url 'delete_goal' 0 %}`.replace("/0/", "/" + goalId + "/");
+
+      deleteModal.classList.add("show");
+      deleteModal.setAttribute("aria-hidden", "false");
+    };
+
+    window.closeDeleteModal = function () {
+      deleteModal.classList.remove("show");
+      deleteModal.setAttribute("aria-hidden", "true");
+    };
+  })();
 </script>
 {% endblock %}
+

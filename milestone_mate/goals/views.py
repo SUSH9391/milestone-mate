@@ -35,7 +35,7 @@ def delete_goal(request, goal_id):
         id=goal_id
         )
     goal.delete()
-    return JsonResponse({'detail': 'Goal deleted'})
+    return redirect("list_goals")
 
 def toggle_goal(request, goal_id):
     if request.method != "POST":

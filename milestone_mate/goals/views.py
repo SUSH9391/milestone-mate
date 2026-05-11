@@ -26,7 +26,16 @@ def list_goals(request):
         'goals/list_goals.html',
         {'goals': goals},
     )
+def delete_goal(request, goal_id):
+    if request.method != "POST":
+        return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
+    goal = get_object_or_404(
+        Goal, 
+        id=goal_id
+        )
+    goal.delete()
+    return JsonResponse({'detail': 'Goal deleted'})
 
 def toggle_goal(request, goal_id):
     if request.method != "POST":

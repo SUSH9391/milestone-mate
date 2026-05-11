@@ -203,45 +203,50 @@
       });
     });
 
-    // Checkbox AJAX toggle (no full page reload)
+    // Row click => open goal detail (checkbox click is handled separately and stops propagation)
     document.querySelectorAll('.gm-row[data-goal-id]').forEach(row => {
-      const checkbox = row.querySelector('input[type="checkbox"]');
-      if (!checkbox) return;
-
-      checkbox.addEventListener('click', async (e) => {
-        e.stopPropagation();
-
+      row.addEventListener('click', () => {
         const goalId = row.getAttribute('data-goal-id');
-        const url = `{% url 'toggle_goal' 0 %}`.replace('/0/','/' + goalId + '/');
-
-        try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({})
-          });
-
-          const data = await res.json();
-          if (!data || typeof data.is_completed === 'undefined') return;
-
-          row.dataset.completed = data.is_completed ? 'true' : 'false';
-          row.style.opacity = data.is_completed ? '0.6' : '1';
-
-          // strike-through is controlled by dataset-completed attribute in CSS
-          row.setAttribute('data-completed', data.is_completed ? 'true' : 'false');
-          checkbox.checked = data.is_completed;
-        } catch (err) {
-          console.error('Toggle failed', err);
-        }
+        window.location.href = `{% url 'goal_detail' 0 %}`.replace('/0/','/' + goalId + '/');
       });
+
+      const checkbox = row.querySelector('input[type="checkbox"]');
+      if (checkbox) {
+        checkbox.addEventListener('click', async (e) => {
+          e.stopPropagation();
+
+          const goalId = row.getAttribute('data-goal-id');
+          const url = `{% url 'toggle_goal' 0 %}`.replace('/0/','/' + goalId + '/');
+
+          try {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+              },
+              body: JSON.stringify({})
+            });
+
+            const data = await res.json();
+            if (!data || typeof data.is_completed === 'undefined') return;
+
+            row.dataset.completed = data.is_completed ? 'true' : 'false';
+            row.style.opacity = data.is_completed ? '0.6' : '1';
+
+            row.setAttribute('data-completed', data.is_completed ? 'true' : 'false');
+            checkbox.checked = data.is_completed;
+          } catch (err) {
+            console.error('Toggle failed', err);
+          }
+        });
+      }
 
       // initial opacity from server state
       const completed = row.getAttribute('data-completed') === 'true';
       row.style.opacity = completed ? '0.6' : '1';
     });
+
 
 
 

@@ -14,5 +14,10 @@ urlpatterns = [
     views.create_subgoal,
     name='create_subgoal'
 ),
+path(
+    'subgoal/toggle/<int:subgoal_id>/',
+    views.toggle_subgoal,
+    name='toggle_subgoal'
+),
 ]
 

@@ -305,15 +305,22 @@ Goals
 
           {% for subgoal in g.subgoals.all %}
 
-          <div class="gm-subgoalRow">
+         <div
+  class="gm-subgoalRow
+  {% if subgoal.is_completed %}
+  completed
+  {% endif %}
+">
 
-            <span class="gm-subgoalArrow">
-              └
-            </span>
+            <input
+  class="gm-subgoalCheck"
+  data-subgoal-id="{{ subgoal.id }}"
+  type="checkbox"
+  {% if subgoal.is_completed %}checked{% endif %}/>
 
-            <input type="checkbox" {% if subgoal.is_completed %} checked {% endif %}>
 
             <span>
+
               {{ subgoal.name }}
             </span>
 
@@ -327,17 +334,37 @@ Goals
 
           {% endfor %}
 
-          <form method="POST" action="{% url 'create_subgoal' g.id %}" class="gm-subgoalForm">
+          <form
+  method="POST"
+  action="{% url 'create_subgoal' g.id %}"
+  class="gm-subgoalForm"
+>
 
-            {% csrf_token %}
+  {% csrf_token %}
 
-            <input type="text" name="name" placeholder="Add subgoal..." class="gm-subgoalInput">
+  <input
+    type="text"
+    name="title"
+    placeholder="Add subgoal..."
+    class="gm-subgoalInput"
 
-            <button type="submit" class="gm-subgoalBtn">
-              Add
-            </button>
+    {% if g.is_completed %}
+    disabled
+    {% endif %}
+  >
 
-          </form>
+  <button
+    type="submit"
+    class="gm-subgoalBtn"
+
+    {% if g.is_completed %}
+    disabled
+    {% endif %}
+  >
+    Add
+  </button>
+
+</form>
 
         </div>
 
@@ -345,11 +372,7 @@ Goals
 
       {% empty %}
 
-      <div class="gm-goalContainer">
-        <div class="gm-row">
-          No goals found.
-        </div>
-      </div>
+      <div class="g-goal Container"><div class="g-row"> NO goals right now!! </div></div>
 
       {% endfor %}
 
@@ -531,6 +554,20 @@ document
           checkbox.checked =
             data.is_completed;
 
+          // Force UI sync for subgoal row styling
+          checkbox.closest(".gm-subgoalRow").classList.toggle(
+            "completed",
+            data.is_completed
+          );
+
+
+          // Keep subgoal row UI consistent with the server state
+          checkbox.closest(".gm-subgoalRow")?.classList.toggle(
+            "completed",
+            data.is_completed
+          );
+
+
           row.style.opacity =
             data.is_completed
               ? "0.6"
@@ -559,7 +596,78 @@ document
   function closeDeleteModal() {
     deleteModal.classList.remove("show");
   }
+document
+  .querySelectorAll(".gm-subgoalCheck")
+  .forEach((checkbox) => {
 
+    checkbox.addEventListener(
+      "click",
+      async (e) => {
+
+        e.stopPropagation();
+
+        const subgoalId =
+          checkbox.getAttribute(
+            "data-subgoal-id"
+          );
+
+        try {
+
+          const res =
+            await fetch(
+
+              `/subgoal/toggle/${subgoalId}/`,
+
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json",
+
+                  "X-CSRFToken":
+                    csrftoken,
+                },
+
+                body:
+                  JSON.stringify({})
+              }
+            );
+
+          const data =
+            await res.json();
+
+          checkbox.checked =
+            data.is_completed;
+
+          const row =
+            checkbox.closest(
+              ".gm-subgoalRow"
+            );
+
+          if (data.is_completed) {
+
+            row.classList.add(
+              "completed"
+            );
+
+          } else {
+
+            row.classList.remove(
+              "completed"
+            );
+          }
+
+        } catch (err) {
+
+          console.error(
+            "Subgoal toggle failed",
+            err
+          );
+        }
+      }
+    );
+  });
 </script>
 
 {% endblock %}

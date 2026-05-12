@@ -266,10 +266,19 @@
     left: 5px;
     top: 0px;
 }
-    .gm-row[data-completed="true"] .gm-check .tick { transform: scale(1); }
+    .gm-row[data-completed='true'] .gm-titleCell {
 
+    text-decoration: line-through;
+
+    opacity: 0.55;
+}
+
+.gm-row[data-completed='true'] {
+
+    opacity: 0.7;
+}
     .gm-titleCell { font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .gm-row[data-completed="true"] .gm-titleCell { text-decoration: line-through; }
+    
     .gm-descCell { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--font-main); }
 
     .gm-attachBtn {
@@ -358,6 +367,31 @@
     padding: 6px 12px;
 
     cursor: pointer;
+}
+.gm-subgoalRow.completed span {
+
+    text-decoration: line-through;
+
+    opacity: 0.5;
+}
+.g-row {
+    padding: 24px;
+}
+.gm-subgoalCheck {
+
+    width: 18px;
+    height: 18px;
+
+    cursor: pointer;
+
+    accent-color: #111827;
+}
+.gm-subgoalInput:disabled,
+.gm-subgoalBtn:disabled {
+
+    opacity: 0.5;
+
+    cursor: not-allowed;
 }
 
     .gm-attachBtn:hover { background: var(--hover-bg); }

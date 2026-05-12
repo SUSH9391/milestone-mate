@@ -69,6 +69,31 @@ def toggle_goal(request, goal_id):
     goal.save(update_fields=['is_completed'])
     return JsonResponse({'is_completed': goal.is_completed})
 
+def toggle_subgoal(request, subgoal_id):
+
+    if request.method != "POST":
+        return JsonResponse(
+            {'detail': 'Method not allowed'},
+            status=405
+        )
+
+    subgoal = get_object_or_404(
+        Subgoal,
+        id=subgoal_id
+    )
+
+    subgoal.is_completed = (
+        not subgoal.is_completed
+    )
+
+    subgoal.save(
+        update_fields=['is_completed']
+    )
+
+    return JsonResponse({
+        'is_completed':
+            subgoal.is_completed
+    })
 
 def goal_detail(request, goal_id):
     goal = get_object_or_404(Goal, id=goal_id)

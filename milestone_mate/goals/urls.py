@@ -9,5 +9,10 @@ urlpatterns = [
     path('goals/toggle/<int:goal_id>/', views.toggle_goal, name='toggle_goal'),
     path('goals/detail/<int:goal_id>/', views.goal_detail, name='goal_detail'),
     path('goals/delete/<int:goal_id>/', views.delete_goal, name='delete_goal'),
+    path(
+    '<int:goal_id>/subgoal/create/',
+    views.create_subgoal,
+    name='create_subgoal'
+),
 ]
 

@@ -47,6 +47,68 @@
             {{ g.description }}
           </div>
 
+          <div class="gm-subgoals">
+
+            {% for subgoal in g.subgoals.all %}
+
+
+    <div class="gm-subgoalRow">
+
+      <span class="gm-subgoalArrow">
+        └
+      </span>
+
+      <input
+        type="checkbox"
+        {% if subgoal.is_completed %}
+        checked
+        {% endif %}
+        onclick="event.stopPropagation();"
+      >
+
+      <span>
+        {{ subgoal.name }}
+      </span>
+
+    </div>
+
+  {% empty %}
+
+    <div class="gm-emptySubgoal">
+      No subgoals
+    </div>
+
+  {% endfor %}
+
+</div>
+
+<form
+  method="POST"
+  action="{% url 'create_subgoal' g.id %}"
+  class="gm-subgoalForm"
+  onsubmit="event.stopPropagation();"
+>
+
+  {% csrf_token %}
+
+  <input
+    type="text"
+    name="title"
+    placeholder="Add subgoal..."
+    class="gm-subgoalInput"
+    onclick="event.stopPropagation();"
+  >
+
+  <button
+    type="submit"
+    class="gm-subgoalBtn"
+    onclick="event.stopPropagation();"
+  >
+    Add
+  </button>
+
+</form>
+
           <div style="display: flex; justify-content: flex-end; gap: 10px">
             {# Attachment #}
             {% if g.attachment_url or g.attachment_name %}
@@ -116,8 +178,9 @@
       </div>
 
       <!-- Inline add form (no backend wired yet; UI-only) -->
-      <form class="gm-inlineForm" id="gmAddForm" method="post" enctype="multipart/form-data">
+      <form class="gm-inlineForm" id="gmAddForm" method="post" enctype="multipart/form-data" onsubmit="event.stopPropagation();">
         {% csrf_token %}
+
         <div class="gm-formGrid">
           <div>
             <div class="gm-label">Title</div>
@@ -315,15 +378,29 @@
       });
 
     document.querySelectorAll(".gm-row[data-goal-id]").forEach((row) => {
-      row.addEventListener("click", () => {
+      row.addEventListener("click", (e) => {
+        // Prevent opening goal detail when interacting with inline UI elements (subgoals, add form)
+        if (
+          e.target.closest(".gm-subgoalForm") ||
+          e.target.closest(".gm-inlineForm") ||
+          e.target.closest(".gm-addRow") ||
+          e.target.closest(".gm-subgoals") ||
+          e.target.closest("button") ||
+          e.target.tagName === "INPUT" ||
+          e.target.tagName === "TEXTAREA"
+        ) {
+          return;
+        }
+
         const goalId = row.getAttribute("data-goal-id");
         window.location.href = `{% url 'goal_detail' 0 %}`.replace("/0/", "/" + goalId + "/");
       });
 
-      const checkbox = row.querySelector('input[type="checkbox"]');
+      const checkbox = row.querySelector('input.gm-check-input[type="checkbox"]');
       if (checkbox) {
         checkbox.addEventListener("click", async (e) => {
           e.stopPropagation();
+
 
           const goalId = row.getAttribute("data-goal-id");
           const url = `{% url 'toggle_goal' 0 %}`.replace("/0/", "/" + goalId + "/");

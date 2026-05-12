@@ -44,7 +44,7 @@ def create_subgoal(request, goal_id):
     if title:
         Subgoal.objects.create(
             goal=goal,
-            title=title
+            name=title
         )
 
     return redirect("list_goals")

@@ -1,459 +1,465 @@
-{% extends 'base.html' %} {% block title %}Goals{% endblock %} {% block content %}
+{% extends 'base.html' %}
 
-<div class="gm-page">
-  <div class="gm-grid">
-    <h1 class="gm-title">Goals</h1>
+{% block title %}
+Goals
+{% endblock %}
 
-    <div class="gm-tabs" id="gmTabs" data-active="{{ active_filter|default:'year' }}">
-      <button type="button" class="gm-tab" data-filter="day" aria-selected="false">
-        📅 Day
-      </button>
-      <button type="button" class="gm-tab" data-filter="month" aria-selected="false">
-        🗓️ Month
-      </button>
-      <button type="button" class="gm-tab" data-filter="year" aria-selected="true">
-        📆 Year
-      </button>
+{% block content %}
 
-      <span class="gm-monthWrap" aria-hidden="true">
-        <input id="gmMonth" class="gm-monthInput" type="month" value="{{ selected_month|default:'' }}" />
-      </span>
-    </div>
-
-    <div class="gm-list" role="list">
-      {% if goals %}
-        {% for g in goals %}
-        <div
-          class="gm-row"
-          role="listitem"
-          data-goal-id="{{ g.id }}"
-          data-completed="{{ g.is_completed|yesno:'true,false' }}"
-          style="cursor: pointer"
-          aria-label="Open goal detail"
-        >
-          <div class="gm-check" title="Toggle complete">
-            <input
-              class="gm-check-input"
-              type="checkbox"
-              aria-label="Toggle complete"
-              {% if g.is_completed %}checked{% endif %}
-            />
-            <span class="tick" aria-hidden="true"></span>
-          </div>
-
-          <div class="gm-titleCell">{{ g.name }}</div>
-
-          <div class="gm-descCell" title="{{ g.description }}">
-            {{ g.description }}
-          </div>
-
-          <div class="gm-subgoals">
-
-            {% for subgoal in g.subgoals.all %}
-
-
-    <div class="gm-subgoalRow">
-
-      <span class="gm-subgoalArrow">
-        └
-      </span>
-
-      <input
-        type="checkbox"
-        {% if subgoal.is_completed %}
-        checked
-        {% endif %}
-        onclick="event.stopPropagation();"
-      >
-
-      <span>
-        {{ subgoal.name }}
-      </span>
-
-    </div>
-
-  {% empty %}
-
-    <div class="gm-emptySubgoal">
-      No subgoals
-    </div>
-
-  {% endfor %}
-
-</div>
-
-<form
-  method="POST"
-  action="{% url 'create_subgoal' g.id %}"
-  class="gm-subgoalForm"
-  onsubmit="event.stopPropagation();"
->
-
-  {% csrf_token %}
-
-  <input
-    type="text"
-    name="title"
-    placeholder="Add subgoal..."
-    class="gm-subgoalInput"
-    onclick="event.stopPropagation();"
-  >
-
-  <button
-    type="submit"
-    class="gm-subgoalBtn"
-    onclick="event.stopPropagation();"
-  >
-    Add
-  </button>
-
-</form>
-
-          <div style="display: flex; justify-content: flex-end; gap: 10px">
-            {# Attachment #}
-            {% if g.attachment_url or g.attachment_name %}
-              <button
-                class="gm-attachBtn"
-                type="button"
-                data-attachment="{{ g.attachment_name|default:'Attachment' }}"
-                aria-label="Attachment"
-              >
-                📎
-              </button>
-            {% else %}
-              <button
-                class="gm-attachBtn dimmed"
-                type="button"
-                disabled
-                aria-label="No attachment"
-              >
-                📎
-              </button>
-            {% endif %}
-
-            {# Delete goal (custom modal UX) #}
-            <form
-              method="POST"
-              action="{% url 'delete_goal' g.id %}"
-              class="gm-deleteForm"
-              data-delete-goal-id="{{ g.id }}"
-              onsubmit="return false;"
-            >
-              {% csrf_token %}
-              <button
-                type="button"
-                class="gm-deleteTrigger"
-                aria-label="Delete goal"
-                onclick="openDeleteModal(event, {{ g.id }});"
-              >
-                Delete
-              </button>
-            </form>
-          </div>
-
-          <div class="gm-dateCell">{{ g.target_date }}</div>
-        </div>
-        {% endfor %}
-      {% else %}
-        <div class="gm-row">
-          <div
-            style="
-              grid-column: 1 / -1;
-              font-family: Poppins, sans-serif;
-              color: var(--muted);
-              font-weight: 600;
-              padding: 8px 0;
-            "
-          >
-            No goals found.
-          </div>
-        </div>
-      {% endif %}
-
-      <!-- Add row -->
-      <div class="gm-addRow">
-        <div class="gm-addBtn" id="gmOpenAdd" role="button" tabindex="0">
-          <span>＋</span> Add a goal
-        </div>
-      </div>
-
-      <!-- Inline add form (no backend wired yet; UI-only) -->
-      <form class="gm-inlineForm" id="gmAddForm" method="post" enctype="multipart/form-data" onsubmit="event.stopPropagation();">
-        {% csrf_token %}
-
-        <div class="gm-formGrid">
-          <div>
-            <div class="gm-label">Title</div>
-            <input class="gm-input" type="text" name="title" placeholder="e.g., Finish project" />
-          </div>
-          <div>
-            <div class="gm-label">Description</div>
-            <textarea class="gm-textarea" name="description" placeholder="Add details..."></textarea>
-          </div>
-          <div>
-            <div class="gm-label">Target Date</div>
-            <input class="gm-input" type="date" name="target_date" required />
-          </div>
-          <div>
-            <div class="gm-label">Attachment</div>
-            <input class="gm-input" type="file" name="attachment" />
-          </div>
-
-          <div class="gm-actions">
-            <button class="gm-primary" type="submit">Save</button>
-            <button class="gm-cancel" type="button" id="gmCancelAdd">Cancel</button>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    {# Pagination UI (works only if view provides page_obj) #}
-    {% if page_obj %}
-      <div class="gm-pagination" aria-label="Pagination">
-        {% if page_obj.has_previous %}
-          <a class="gm-pageLink" href="?page={{ page_obj.previous_page_number }}">
-            ← {{ page_obj.previous_page_number }}
-          </a>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-          {% if num == page_obj.number %}
-            <span class="gm-pageLink active">{{ num }}</span>
-          {% else %}
-            {% if num >= page_obj.number|add:-3 and num <= page_obj.number|add:3 %}
-              <a class="gm-pageLink" href="?page={{ num }}">{{ num }}</a>
-            {% endif %}
-          {% endif %}
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-          <a class="gm-pageLink" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }} →</a>
-        {% endif %}
-      </div>
-    {% endif %}
-  </div>
-</div>
-
-<div class="gm-tooltip" id="gmTip"></div>
-
-{# Custom delete modal (replaces browser confirm popup) #}
 <style>
+  .gm-page {
+    padding: 40px;
+    background: #fafafa;
+    min-height: 100vh;
+  }
+
+  .gm-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .gm-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  .gm-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .gm-goalContainer {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .gm-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr auto auto;
+    align-items: center;
+    gap: 20px;
+    padding: 22px;
+  }
+
+  .gm-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gm-check-input {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+
+  .gm-titleCell {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .gm-descCell {
+    color: #6b7280;
+  }
+
+  .gm-dateCell {
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .gm-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .gm-deleteTrigger {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .gm-subgoals {
+    padding: 0 22px 20px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gm-subgoalRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #6b7280;
+    padding: 6px 0;
+  }
+
+  .gm-subgoalArrow {
+    opacity: 0.5;
+  }
+
+  .gm-subgoalForm {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .gm-subgoalInput {
+    flex: 1;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+
+  .gm-subgoalBtn {
+    border: none;
+    background: #111827;
+    color: white;
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+
+  .gm-emptySubgoal {
+    color: #9ca3af;
+    font-size: 14px;
+  }
+
+  .gm-addRow {
+    margin-top: 24px;
+  }
+
+  .gm-addBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: white;
+    border: 1px dashed #d1d5db;
+    border-radius: 14px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .gm-inlineForm {
+    display: none;
+    margin-top: 18px;
+    background: white;
+    padding: 22px;
+    border-radius: 18px;
+    border: 1px solid #e5e7eb;
+  }
+
+  .gm-inlineForm.show {
+    display: block;
+  }
+
+  .gm-formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .gm-input,
+  .gm-textarea {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 12px 14px;
+  }
+
+  .gm-textarea {
+    min-height: 120px;
+  }
+
+  .gm-primary {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .gm-cancel {
+    border: 1px solid #d1d5db;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .gm-actionsForm {
+    display: flex;
+    gap: 12px;
+  }
+
   .gm-modalOverlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.35);
+    background: rgba(0, 0, 0, 0.4);
     display: none;
     align-items: center;
     justify-content: center;
     z-index: 9999;
   }
+
   .gm-modalOverlay.show {
     display: flex;
   }
+
   .gm-modal {
+    width: 380px;
     background: white;
-    padding: 24px;
     border-radius: 18px;
-    width: 360px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    font-family: Poppins, sans-serif;
+    padding: 24px;
   }
-  .gm-modal h3 {
-    margin-top: 0;
-  }
+
   .gm-modalActions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 12px;
     margin-top: 20px;
   }
+
   .gm-cancelBtn,
   .gm-deleteBtn {
     border: none;
-    padding: 10px 14px;
     border-radius: 10px;
+    padding: 10px 16px;
     cursor: pointer;
   }
-  .gm-cancelBtn {
-    background: #f3f4f6;
-  }
+
   .gm-deleteBtn {
     background: #111827;
     color: white;
   }
+
+  @media (max-width: 768px) {
+    .gm-row {
+      grid-template-columns: 40px 1fr;
+    }
+
+    .gm-descCell,
+    .gm-dateCell,
+    .gm-actions {
+      grid-column: 2;
+    }
+  }
 </style>
 
-<div class="gm-modalOverlay" id="deleteModal" aria-hidden="true">
-  <div class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
-    <h3 id="deleteModalTitle">Delete Goal</h3>
-    <p>Are you sure you want to delete this goal?</p>
+<div class="gm-page">
+  <div class="gm-grid">
 
-    <div class="gm-modalActions">
-      <button class="gm-cancelBtn" type="button" onclick="closeDeleteModal(event)">Cancel</button>
+    <h1 class="gm-title">Goals</h1>
 
-      <form id="deleteForm" method="POST">
-        {% csrf_token %}
-        <button type="submit" class="gm-deleteBtn">Delete</button>
-      </form>
+    <div class="gm-list">
+
+      {% for g in goals %}
+
+      <div class="gm-goalContainer">
+
+        <div class="gm-row" data-goal-id="{{ g.id }}" data-completed="{{ g.is_completed|yesno:'true,false' }}">
+
+          <div class="gm-check">
+            <input class="gm-check-input" type="checkbox" {% if g.is_completed %}checked{% endif %}>
+          </div>
+
+          <div class="gm-titleCell">
+            {{ g.name }}
+          </div>
+
+          <div class="gm-descCell">
+            {{ g.description }}
+          </div>
+
+          <div class="gm-dateCell">
+            {{ g.target_date }}
+          </div>
+
+          <div class="gm-actions">
+
+            <form method="POST" action="{% url 'delete_goal' g.id %}">
+              {% csrf_token %}
+
+              <button type="button" class="gm-deleteTrigger" onclick="openDeleteModal(event, {{ g.id }})">
+                Delete
+              </button>
+            </form>
+
+          </div>
+
+        </div>
+
+        <div class="gm-subgoals">
+
+          {% for subgoal in g.subgoals.all %}
+
+          <div class="gm-subgoalRow">
+
+            <span class="gm-subgoalArrow">
+              └
+            </span>
+
+            <input type="checkbox" {% if subgoal.is_completed %} checked {% endif %}>
+
+            <span>
+              {{ subgoal.name }}
+            </span>
+
+          </div>
+
+          {% empty %}
+
+          <div class="gm-emptySubgoal">
+            No subgoals yet.
+          </div>
+
+          {% endfor %}
+
+          <form method="POST" action="{% url 'create_subgoal' g.id %}" class="gm-subgoalForm">
+
+            {% csrf_token %}
+
+            <input type="text" name="name" placeholder="Add subgoal..." class="gm-subgoalInput">
+
+            <button type="submit" class="gm-subgoalBtn">
+              Add
+            </button>
+
+          </form>
+
+        </div>
+
+      </div>
+
+      {% empty %}
+
+      <div class="gm-goalContainer">
+        <div class="gm-row">
+          No goals found.
+        </div>
+      </div>
+
+      {% endfor %}
+
     </div>
+
+    <div class="gm-addRow">
+      <div class="gm-addBtn" id="gmOpenAdd">
+        ＋ Add a goal
+      </div>
+    </div>
+
+    <form class="gm-inlineForm" id="gmAddForm" method="POST">
+
+      {% csrf_token %}
+
+      <div class="gm-formGrid">
+
+        <input class="gm-input" type="text" name="title" placeholder="Goal title">
+
+        <textarea class="gm-textarea" name="description" placeholder="Goal description"></textarea>
+
+        <input class="gm-input" type="date" name="target_date">
+
+        <div class="gm-actionsForm">
+
+          <button class="gm-primary" type="submit">
+            Save Goal
+          </button>
+
+          <button class="gm-cancel" type="button" id="gmCancelAdd">
+            Cancel
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
   </div>
 </div>
 
+<div class="gm-modalOverlay" id="deleteModal">
+
+  <div class="gm-modal">
+
+    <h3>Delete Goal</h3>
+
+    <p>
+      Are you sure you want to delete this goal?
+    </p>
+
+    <div class="gm-modalActions">
+
+      <button class="gm-cancelBtn" onclick="closeDeleteModal()">
+        Cancel
+      </button>
+
+      <form id="deleteForm" method="POST">
+
+        {% csrf_token %}
+
+        <button type="submit" class="gm-deleteBtn">
+          Delete
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
 <script>
-  (function () {
-    const tabs = document.getElementById("gmTabs");
-    const monthInput = document.getElementById("gmMonth");
-    const openAdd = document.getElementById("gmOpenAdd");
-    const addForm = document.getElementById("gmAddForm");
-    const cancelAdd = document.getElementById("gmCancelAdd");
-    const tip = document.getElementById("gmTip");
 
-    const deleteModal = document.getElementById("deleteModal");
-    const deleteForm = document.getElementById("deleteForm");
+  const openAdd =
+    document.getElementById("gmOpenAdd");
 
-    function getCookie(name) {
-      const cookies = document.cookie ? document.cookie.split(";") : [];
-      for (let c of cookies) {
-        const cookie = c.trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          return decodeURIComponent(cookie.substring(name.length + 1));
-        }
-      }
-      return null;
-    }
+  const addForm =
+    document.getElementById("gmAddForm");
 
-    const csrftoken = getCookie("csrftoken");
+  const cancelAdd =
+    document.getElementById("gmCancelAdd");
 
-    function setActive(filter) {
-      tabs.dataset.active = filter;
-      [...tabs.querySelectorAll(".gm-tab")].forEach((btn) => {
-        const sel = btn.getAttribute("data-filter") === filter;
-        btn.setAttribute("aria-selected", sel ? "true" : "false");
-      });
-    }
+  const deleteModal =
+    document.getElementById("deleteModal");
 
-    tabs &&
-      tabs.addEventListener("click", (e) => {
-        const btn = e.target.closest(".gm-tab");
-        if (!btn) return;
-        setActive(btn.getAttribute("data-filter"));
-      });
+  const deleteForm =
+    document.getElementById("deleteForm");
 
-    if (monthInput) {
-      monthInput.addEventListener("change", () => {
-        setActive("month");
-      });
-    }
+  openAdd.addEventListener("click", () => {
+    addForm.classList.add("show");
+  });
 
-    if (openAdd) {
-      openAdd.addEventListener("click", () => {
-        addForm && addForm.classList.add("show");
-      });
-      openAdd.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          addForm && addForm.classList.add("show");
-        }
-      });
-    }
+  cancelAdd.addEventListener("click", () => {
+    addForm.classList.remove("show");
+  });
 
-    if (cancelAdd) {
-      cancelAdd.addEventListener("click", () => {
-        addForm && addForm.classList.remove("show");
-      });
-    }
+  function openDeleteModal(event, goalId) {
 
-    document
-      .querySelectorAll(".gm-attachBtn[data-attachment]")
-      .forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          const text = btn.getAttribute("data-attachment");
-          if (!text) return;
-          tip.textContent = text;
-          tip.style.display = "block";
-          tip.style.left = e.clientX + 12 + "px";
-          tip.style.top = e.clientY + 12 + "px";
-          clearTimeout(btn.__t);
-          btn.__t = setTimeout(() => (tip.style.display = "none"), 2200);
-        });
-      });
+    event.stopPropagation();
 
-    document.querySelectorAll(".gm-row[data-goal-id]").forEach((row) => {
-      row.addEventListener("click", (e) => {
-        // Prevent opening goal detail when interacting with inline UI elements (subgoals, add form)
-        if (
-          e.target.closest(".gm-subgoalForm") ||
-          e.target.closest(".gm-inlineForm") ||
-          e.target.closest(".gm-addRow") ||
-          e.target.closest(".gm-subgoals") ||
-          e.target.closest("button") ||
-          e.target.tagName === "INPUT" ||
-          e.target.tagName === "TEXTAREA"
-        ) {
-          return;
-        }
+    deleteForm.action =
+      `/goals/delete/${goalId}/`;
 
-        const goalId = row.getAttribute("data-goal-id");
-        window.location.href = `{% url 'goal_detail' 0 %}`.replace("/0/", "/" + goalId + "/");
-      });
+    deleteModal.classList.add("show");
+  }
 
-      const checkbox = row.querySelector('input.gm-check-input[type="checkbox"]');
-      if (checkbox) {
-        checkbox.addEventListener("click", async (e) => {
-          e.stopPropagation();
+  function closeDeleteModal() {
+    deleteModal.classList.remove("show");
+  }
 
-
-          const goalId = row.getAttribute("data-goal-id");
-          const url = `{% url 'toggle_goal' 0 %}`.replace("/0/", "/" + goalId + "/");
-
-          try {
-            const res = await fetch(url, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": csrftoken,
-              },
-              body: JSON.stringify({}),
-            });
-
-            const data = await res.json();
-            if (!data || typeof data.is_completed === "undefined") return;
-
-            row.dataset.completed = data.is_completed ? "true" : "false";
-            row.style.opacity = data.is_completed ? "0.6" : "1";
-
-            row.setAttribute("data-completed", data.is_completed ? "true" : "false");
-            checkbox.checked = data.is_completed;
-          } catch (err) {
-            console.error("Toggle failed", err);
-          }
-        });
-      }
-
-      const completed = row.getAttribute("data-completed") === "true";
-      row.style.opacity = completed ? "0.6" : "1";
-    });
-
-    document.addEventListener("click", (e) => {
-      if (tip && tip.style.display === "block") {
-        if (!e.target.closest(".gm-attachBtn")) tip.style.display = "none";
-      }
-    });
-
-    // Expose for onclick handlers in the template
-    window.openDeleteModal = function (event, goalId) {
-      if (event) event.stopPropagation();
-
-      deleteForm.action = `{% url 'delete_goal' 0 %}`.replace("/0/", "/" + goalId + "/");
-
-      deleteModal.classList.add("show");
-      deleteModal.setAttribute("aria-hidden", "false");
-    };
-
-    window.closeDeleteModal = function () {
-      deleteModal.classList.remove("show");
-      deleteModal.setAttribute("aria-hidden", "true");
-    };
-  })();
 </script>
-{% endblock %}
 
+{% endblock %}

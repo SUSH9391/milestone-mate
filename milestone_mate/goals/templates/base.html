@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}Milestone Mate{% endblock %}</title>
 
-  <!-- Google Fonts: Poppins -->
+  <!-- Google Fonts: Poppins (base) + Inter (navbar) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -468,14 +469,178 @@
 </head>
 <body>
   <header>
-    <nav>
-      <a href="{% url 'list_goals' %}">Goals</a>
+    <nav class="app-nav">
+      <div class="app-nav-left">
+        <a class="app-logo" href="{% url 'home' %}">
+          Milestone Mate
+        </a>
+      </div>
+
+      <div class="app-nav-right">
+        <a class="app-nav-link" href="{% url 'home' %}">Home</a>
+        <a class="app-nav-link" href="{% url 'list_goals' %}">Goal</a>
+
+        <div class="app-dropdown" data-open="false">
+          <button class="app-avatar" type="button" aria-haspopup="menu" aria-expanded="false">
+            <span class="app-avatar-inner">🙂</span>
+          </button>
+          <div class="app-dropdown-menu" role="menu">
+            <a class="app-dropdown-item" href="#" role="menuitem">Rewards</a>
+            <a class="app-dropdown-item" href="#" role="menuitem">Subscription</a>
+            <a class="app-dropdown-item app-dropdown-logout" href="#" role="menuitem">Logout</a>
+          </div>
+        </div>
+
+        <script>
+          (function () {
+            const dropdown = document.currentScript.previousElementSibling;
+            const trigger = dropdown.querySelector('.app-avatar');
+            const menu = dropdown.querySelector('.app-dropdown-menu');
+
+            function setOpen(isOpen) {
+              dropdown.dataset.open = String(isOpen);
+              trigger.setAttribute('aria-expanded', String(isOpen));
+            }
+
+            trigger.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const isOpen = dropdown.dataset.open === 'true';
+              setOpen(!isOpen);
+            });
+
+            document.addEventListener('click', () => setOpen(false));
+
+            menu.addEventListener('click', (e) => e.stopPropagation());
+          })();
+        </script>
+      </div>
     </nav>
   </header>
 
   <main>
     {% block content %}{% endblock %}
   </main>
+
+  <style>
+    .app-nav {
+      width: 100%;
+      padding: 0 40px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      max-width: 100%;
+    }
+
+    .app-nav > .app-nav-left,
+    .app-nav > .app-nav-right {
+      width: 100%;
+      max-width: 1200px;
+    }
+
+    .app-nav-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .app-nav-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+
+
+    .app-logo {
+      text-decoration: none;
+      font-family: "Inter", sans-serif;
+      font-weight: 800;
+      color: var(--text-primary);
+      font-size: 18px;
+    }
+
+    .app-nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .app-nav-link {
+      text-decoration: none;
+      font-family: "Inter", sans-serif;
+      color: var(--text-primary);
+      font-weight: 700;
+      padding: 8px 10px;
+      border-radius: 10px;
+    }
+
+    .app-nav-link:hover {
+      background: var(--hover-bg);
+    }
+
+    .app-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 9999px;
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .app-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .app-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 220px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.08);
+      padding: 8px;
+      display: none;
+      z-index: 1000;
+    }
+
+    .app-dropdown[data-open="true"] .app-dropdown-menu {
+      display: block;
+    }
+
+    .app-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 10px 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-family: "Inter", sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .app-dropdown-item:hover {
+      background: var(--hover-bg);
+    }
+
+    .app-dropdown-logout {
+      color: #b91c1c;
+    }
+
+    .app-avatar-inner {
+      transform: translateY(-1px);
+      user-select: none;
+    }
+  </style>
 </body>
 </html>
 

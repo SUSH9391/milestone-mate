@@ -421,7 +421,7 @@ Goals
       </a>
     </div>
 
-    <form class="gm-inlineForm" id="gmAddForm" method="POST">
+    <form class="gm-inlineForm" id="gmAddForm" method="POST" action="{% url 'create_goal' %}" enctype="multipart/form-data">
 
       {% csrf_token %}
 

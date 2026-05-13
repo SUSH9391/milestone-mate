@@ -26,17 +26,27 @@
 
 <script>
 function toggleDateField() {
-    const type = document.getElementById('goal_type').value;
-    // Django form renders target_date in a <p>. We will find the paragraph containing it.
-    const dateInput = document.getElementById('target_date_field');
-    if(dateInput) {
-        const dateWrapper = dateInput.closest('p');
-        if(dateWrapper) {
-            dateWrapper.style.display = (type === 'long_term') ? 'block' : 'none';
-        }
+    const goalType = document.getElementById('id_goal_type');
+    const dateInput = document.getElementById('id_target_date');
+
+    if (!goalType || !dateInput) return;
+
+    const dateWrapper = dateInput.closest('p');
+
+    if (dateWrapper) {
+        dateWrapper.style.display =
+            goalType.value === 'long_term' ? 'block' : 'none';
     }
 }
-// Run on page load to set initial state
-document.addEventListener('DOMContentLoaded', toggleDateField);
+
+document.addEventListener('DOMContentLoaded', () => {
+    toggleDateField();
+
+    const goalType = document.getElementById('id_goal_type');
+
+    if (goalType) {
+        goalType.addEventListener('change', toggleDateField);
+    }
+});
 </script>
 {% endblock %}

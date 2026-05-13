@@ -3,40 +3,210 @@
 {% block title %}Create Goal{% endblock %}
 
 {% block content %}
-<div style="padding: 40px; background: #fafafa; min-height: 100vh;">
-  <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 18px; border: 1px solid #e5e7eb;">
-    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">Create New Goal</h1>
+<div class="goal-page">
+  <div class="goal-card">
     
-    <form method="POST" action="{% url 'create_goal' %}" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 18px;">
-        {% csrf_token %}
-        {{ form.as_p }}
-        
-        <div id="date_field_wrapper" style="display: none;">
-            <!-- Just a wrapper for the JS to target, although form.as_p outputs everything sequentially. 
-                 The JS given by the user actually targets `date_field_wrapper`, but `form.as_p` doesn't provide this wrapper. 
-                 I'll add the JS as instructed but it might be better to wrap the date input. -->
-        </div>
+    <div class="goal-header">
+      <h1>Create New Goal</h1>
+      <p>Set your daily or long-term goals and stay consistent.</p>
+    </div>
 
-        <button type="submit" style="background: #111827; color: white; padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">
-            Save Goal
+    <form
+      method="POST"
+      action="{% url 'create_goal' %}"
+      enctype="multipart/form-data"
+      class="goal-form"
+    >
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label>{{ form.name.label }}</label>
+        {{ form.name }}
+      </div>
+
+      <div class="form-group">
+        <label>{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+
+      <div class="form-group">
+        <label>{{ form.goal_type.label }}</label>
+        {{ form.goal_type }}
+      </div>
+
+      <div class="form-group" id="target_date_container">
+        <label>{{ form.target_date.label }}</label>
+        {{ form.target_date }}
+
+        {% if form.target_date.errors %}
+          <div class="form-error">
+            {{ form.target_date.errors }}
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="button-group">
+        <button class="save-btn" type="submit">
+          Save Goal
         </button>
+
+        <a class="cancel-btn" href="{% url 'list_goals' %}">
+          Cancel
+        </a>
+      </div>
     </form>
   </div>
 </div>
 
+<style>
+.goal-page {
+    min-height: 100vh;
+    padding: 40px 20px;
+    background: #f5f7fb;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.goal-card {
+    width: 100%;
+    max-width: 700px;
+    background: white;
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb;
+}
+
+.goal-header {
+    margin-bottom: 32px;
+}
+
+.goal-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 8px;
+}
+
+.goal-header p {
+    color: #6b7280;
+    font-size: 15px;
+}
+
+.goal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #d1d5db;
+    font-size: 15px;
+    transition: 0.2s ease;
+    background: #fff;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #111827;
+    box-shadow: 0 0 0 4px rgba(17, 24, 39, 0.08);
+}
+
+.button-group {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.save-btn {
+    background: #111827;
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.save-btn:hover {
+    transform: translateY(-1px);
+    background: #000;
+}
+
+.cancel-btn {
+    padding: 14px 22px;
+    border-radius: 14px;
+    border: 1px solid #d1d5db;
+    text-decoration: none;
+    color: #374151;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background: #f3f4f6;
+}
+
+.form-error {
+    color: #dc2626;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .goal-card {
+        padding: 24px;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .save-btn,
+    .cancel-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+
 <script>
 function toggleDateField() {
     const goalType = document.getElementById('id_goal_type');
-    const dateInput = document.getElementById('id_target_date');
+    const container = document.getElementById('target_date_container');
 
-    if (!goalType || !dateInput) return;
+    if (!goalType || !container) return;
 
-    const dateWrapper = dateInput.closest('p');
-
-    if (dateWrapper) {
-        dateWrapper.style.display =
-            goalType.value === 'long_term' ? 'block' : 'none';
-    }
+    container.style.display =
+        goalType.value === 'long_term' ? 'flex' : 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {

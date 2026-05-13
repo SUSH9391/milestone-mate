@@ -8,7 +8,7 @@ class Goal(models.Model):
     ]
 
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     goal_type = models.CharField(
         max_length=10,
         choices=GOAL_TYPE_CHOICES,
@@ -30,7 +30,7 @@ class Goal(models.Model):
 class Subgoal(models.Model):
     goal = models.ForeignKey(Goal, related_name='subgoals', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     is_completed = models.BooleanField(default=False)
 
     def __str__(self):

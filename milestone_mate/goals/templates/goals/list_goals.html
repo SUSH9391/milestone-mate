@@ -287,7 +287,7 @@ Goals
         <div class="gm-row" data-goal-id="{{ g.id }}" data-completed="{{ g.is_completed|yesno:'true,false' }}">
 
           <div class="gm-check">
-            <input class="gm-check-input" type="checkbox" {% if g.is_completed %}checked{% endif %}>
+            <input class="gm-check-input" type="checkbox" {% if g.is_completed %}checked{% endif %} data-goal-id="{{ g.id }}">
           </div>
 
           <div class="gm-titleCell">
@@ -487,39 +487,27 @@ Goals
 
 <script>
 
-  const openAdd =
-    document.getElementById("gmOpenAdd");
+  const openAdd = document.getElementById("gmOpenAdd");
+  const addForm = document.getElementById("gmAddForm");
+  const cancelAdd = document.getElementById("gmCancelAdd");
+  const deleteModal = document.getElementById("deleteModal");
+  const deleteForm = document.getElementById("deleteForm");
 
-  const addForm =
-    document.getElementById("gmAddForm");
+  // These elements don't exist on this page currently; guard to avoid breaking JS execution.
+  if (openAdd && addForm) {
+    openAdd.addEventListener("click", () => {
+      addForm.classList.add("show");
+      setTimeout(() => {
+        addForm.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 100);
+    });
+  }
 
-  const cancelAdd =
-    document.getElementById("gmCancelAdd");
-
-  const deleteModal =
-    document.getElementById("deleteModal");
-
-  const deleteForm =
-    document.getElementById("deleteForm");
-
-  openAdd.addEventListener("click", () => {
-
-    addForm.classList.add("show");
-
-    setTimeout(() => {
-
-      addForm.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
-
-    }, 100);
-
-  });
-
-  cancelAdd.addEventListener("click", () => {
-    addForm.classList.remove("show");
-  });
+  if (cancelAdd && addForm) {
+    cancelAdd.addEventListener("click", () => {
+      addForm.classList.remove("show");
+    });
+  }
 
   // Close add form when user clicks outside the form and outside the Add button.
   // (Do NOT close on Cancel click; Cancel should keep the form handling intact.)
@@ -541,44 +529,24 @@ Goals
     }
   });
   function getCookie(name) {
-
-  const cookies =
-    document.cookie
-      ? document.cookie.split(";")
-      : [];
-
-  for (let c of cookies) {
-
-    const cookie = c.trim();
-
-    if (
-      cookie.substring(
-        0,
-        name.length + 1
-      ) === name + "="
-    ) {
-
-      return decodeURIComponent(
-        cookie.substring(
-          name.length + 1
-        )
-      );
+    const cookies = document.cookie ? document.cookie.split(';') : [];
+    for (let c of cookies) {
+      const cookie = c.trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        return decodeURIComponent(cookie.substring(name.length + 1));
+      }
     }
+    return null;
   }
 
-  return null;
-}
-
-const csrftoken =
-  getCookie("csrftoken");
-
+  const csrftoken = getCookie('csrftoken');
 
 document
   .querySelectorAll(".gm-row")
-  .forEach((row) => {
+  .forEach((goalRow) => {
 
     const checkbox =
-      row.querySelector(
+      goalRow.querySelector(
         ".gm-check-input"
       );
 
@@ -591,31 +559,25 @@ document
         e.stopPropagation();
 
         const goalId =
-          row.getAttribute(
+          goalRow.getAttribute(
             "data-goal-id"
           );
-
-        const url =
-          `/goals/toggle/${goalId}/`;
 
         try {
 
           const res =
-            await fetch(url, {
-
-              method: "POST",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-
-                "X-CSRFToken":
-                  csrftoken,
-              },
-
-              body:
-                JSON.stringify({})
-            });
+            await fetch(
+              `/goals/toggle/${goalId}/`,
+              {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": csrftoken,
+                },
+                body: JSON.stringify({})
+              }
+            );
 
           const data =
             await res.json();
@@ -623,21 +585,7 @@ document
           checkbox.checked =
             data.is_completed;
 
-          // Force UI sync for subgoal row styling
-          checkbox.closest(".gm-subgoalRow").classList.toggle(
-            "completed",
-            data.is_completed
-          );
-
-
-          // Keep subgoal row UI consistent with the server state
-          checkbox.closest(".gm-subgoalRow")?.classList.toggle(
-            "completed",
-            data.is_completed
-          );
-
-
-          row.style.opacity =
+          goalRow.style.opacity =
             data.is_completed
               ? "0.6"
               : "1";

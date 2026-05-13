@@ -1,10 +1,18 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import Goal, Subgoal
-
-
+from streaks.utils import get_streak_data
+from datetime import date
 def home(request):
-    return render(request, 'home/home.html')
+    streak_data = get_streak_data()
+
+    return render(
+        request,
+        'home/home.html',
+        {
+            'streak_data': streak_data
+        }
+    )
 
 
 def list_goals(request):
@@ -79,9 +87,25 @@ def toggle_goal(request, goal_id):
     if request.method != "POST":
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
+    from datetime import date
+
     goal = get_object_or_404(Goal, id=goal_id)
     goal.is_completed = not goal.is_completed
-    goal.save(update_fields=['is_completed'])
+
+    if goal.is_completed:
+
+        goal.completed_at = date.today()
+
+    else:   
+
+        goal.completed_at = None
+
+    goal.save(
+        update_fields=[
+            'is_completed',
+            'completed_at'
+        ]
+)
     return JsonResponse({'is_completed': goal.is_completed})
 
 def toggle_subgoal(request, subgoal_id):

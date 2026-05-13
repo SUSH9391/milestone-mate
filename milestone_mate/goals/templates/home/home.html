@@ -1,8 +1,139 @@
 {% extends 'base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}
+Home
+{% endblock %}
 
 {% block content %}
-<h1>Welcome to Milestone Mate</h1>
-<p>Start setting your goals and track your progress.</p>
+
+<div class="home-dashboard">
+
+  <h1>
+    Welcome to Milestone Mate
+  </h1>
+
+  <p>
+    Start setting your goals and track your progress.
+  </p>
+
+  <div class="streak-card">
+
+    <h2>
+      🔥 Streak Dashboard
+    </h2>
+
+    <div class="streak-grid">
+
+      <div class="streak-item">
+
+        <h3>
+          Current Streak
+        </h3>
+
+        <p>
+          {{ streak_data.current_streak }}
+          days
+        </p>
+
+      </div>
+
+      <div class="streak-item">
+
+        <h3>
+          Longest Streak
+        </h3>
+
+        <p>
+          {{ streak_data.longest_streak }}
+          days
+        </p>
+
+      </div>
+
+      <div class="streak-item">
+
+        <h3>
+          Last Updated
+        </h3>
+
+        <p>
+          {{ streak_data.last_updated }}
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<style>
+
+.home-dashboard {
+
+    padding: 40px;
+
+    max-width: 1100px;
+
+    margin: 0 auto;
+}
+
+.streak-card {
+
+    margin-top: 32px;
+
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 18px;
+
+    padding: 24px;
+
+    box-shadow:
+      0 10px 30px rgba(0,0,0,0.04);
+}
+
+.streak-grid {
+
+    margin-top: 20px;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(auto-fit, minmax(220px, 1fr));
+
+    gap: 18px;
+}
+
+.streak-item {
+
+    background: #f9fafb;
+
+    border-radius: 14px;
+
+    padding: 20px;
+}
+
+.streak-item h3 {
+
+    margin-bottom: 10px;
+
+    color: #6b7280;
+
+    font-size: 15px;
+}
+
+.streak-item p {
+
+    font-size: 28px;
+
+    font-weight: 700;
+
+    color: #111827;
+}
+
+</style>
+
 {% endblock %}

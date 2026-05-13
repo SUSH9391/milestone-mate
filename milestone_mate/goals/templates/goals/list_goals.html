@@ -301,11 +301,11 @@ Goals
 
         </div>
 
-        <div class="gm-subgoals">
+          <div class="gm-subgoals">
 
           {% for subgoal in g.subgoals.all %}
 
-         <div
+          <div
   class="gm-subgoalRow
   {% if subgoal.is_completed %}
   completed
@@ -313,16 +313,27 @@ Goals
 ">
 
             <input
-  class="gm-subgoalCheck"
-  data-subgoal-id="{{ subgoal.id }}"
-  type="checkbox"
-  {% if subgoal.is_completed %}checked{% endif %}/>
-
+              class="gm-subgoalCheck"
+              data-subgoal-id="{{ subgoal.id }}"
+              type="checkbox"
+              {% if subgoal.is_completed %}checked{% endif %}/>
 
             <span>
-
               {{ subgoal.name }}
             </span>
+
+            <div class="gm-actions" style="margin-left:auto;">
+              <form method="POST" action="#" onsubmit="return false;">
+                {% csrf_token %}
+                <button
+                  type="button"
+                  class="gm-deleteTrigger"
+                  onclick="openSubgoalDeleteModal(event, {{ subgoal.id }})"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
 
           </div>
 
@@ -363,10 +374,14 @@ Goals
   >
     Add
   </button>
+  </form>
+  <div class="gm-actions">
 
-</form>
+            {# Subgoal-level delete (per item) lives inside the subgoal loop #}
+            
 
-        </div>
+          </div>
+
 
       </div>
 
@@ -414,6 +429,7 @@ Goals
 
   </div>
 </div>
+
 
 <div class="gm-modalOverlay" id="deleteModal">
 
@@ -465,13 +481,44 @@ Goals
     document.getElementById("deleteForm");
 
   openAdd.addEventListener("click", () => {
+
     addForm.classList.add("show");
+
+    setTimeout(() => {
+
+      addForm.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+
+    }, 100);
+
   });
 
   cancelAdd.addEventListener("click", () => {
     addForm.classList.remove("show");
   });
-function getCookie(name) {
+
+  // Close add form when user clicks outside the form and outside the Add button.
+  // (Do NOT close on Cancel click; Cancel should keep the form handling intact.)
+  document.addEventListener('click', (e) => {
+    if (
+      addForm.classList.contains('show') &&
+      !addForm.contains(e.target) &&
+      !openAdd.contains(e.target) &&
+      !cancelAdd.contains(e.target)
+    ) {
+      addForm.classList.remove('show');
+    }
+  });
+
+  // Close if escape is pressed
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      addForm.classList.remove('show');
+    }
+  });
+  function getCookie(name) {
 
   const cookies =
     document.cookie
@@ -596,6 +643,14 @@ document
   function closeDeleteModal() {
     deleteModal.classList.remove("show");
   }
+
+  function openSubgoalDeleteModal(event, subgoalId) {
+    event.stopPropagation();
+
+    deleteForm.action = `/subgoal/delete/${subgoalId}/`;
+    deleteModal.classList.add("show");
+  }
+
 document
   .querySelectorAll(".gm-subgoalCheck")
   .forEach((checkbox) => {

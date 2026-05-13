@@ -60,6 +60,21 @@ def delete_goal(request, goal_id):
     goal.delete()
     return redirect("list_goals")
 
+def delete_subgoal(request, subgoal_id):
+    if request.method != "POST":
+        return JsonResponse(
+            {'detail': 'Method not allowed'},
+            status=405
+        )
+
+    subgoal = get_object_or_404(
+        Subgoal,
+        id=subgoal_id
+    )
+
+    subgoal.delete()
+    return redirect("list_goals")
+
 def toggle_goal(request, goal_id):
     if request.method != "POST":
         return JsonResponse({'detail': 'Method not allowed'}, status=405)

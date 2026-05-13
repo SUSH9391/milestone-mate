@@ -19,5 +19,10 @@ path(
     views.toggle_subgoal,
     name='toggle_subgoal'
 ),
+path(
+    'subgoal/delete/<int:subgoal_id>/',
+    views.delete_subgoal,
+    name='delete_subgoal'
+),
 ]
 

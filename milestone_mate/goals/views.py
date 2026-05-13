@@ -6,19 +6,36 @@ from streaks.utils import get_streak_data
 from datetime import date
 from django.core.paginator import Paginator
 
+from dashboard.utils import (
+    calculate_weekly_consistency,
+    long_term_frequency,
+    long_term_completion_rate,
+)
+
+
 def home(request):
     streak_data = get_streak_data()
+
+    user_goals = Goal.objects.all()  # replace with user-specific filtering if/when auth is added
+    weekly_consistency = calculate_weekly_consistency(user_goals)
+    long_term_freq = long_term_frequency(user_goals)
+    completion_rate = long_term_completion_rate(user_goals)
 
     return render(
         request,
         'home/home.html',
         {
-            'streak_data': streak_data
+            'streak_data': streak_data,
+            'weekly_consistency': weekly_consistency,
+            'long_term_freq': long_term_freq,
+            'completion_rate': completion_rate,
         }
     )
 
 
+
 def list_goals(request):
+
     goal_type = request.GET.get('type', None)
     goals = Goal.objects.all()
     if goal_type in ['daily', 'long_term']:

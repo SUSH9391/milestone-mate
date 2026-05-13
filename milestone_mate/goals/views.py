@@ -1,8 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import Goal, Subgoal
+from .forms import GoalForm
 from streaks.utils import get_streak_data
 from datetime import date
+from django.core.paginator import Paginator
+
 def home(request):
     streak_data = get_streak_data()
 
@@ -16,24 +19,34 @@ def home(request):
 
 
 def list_goals(request):
-    if request.method == "POST":
-        title = request.POST.get("title")
-        description = request.POST.get("description")
-        target_date = request.POST.get("target_date")
-
-        Goal.objects.create(
-            name=title,
-            description=description,
-            target_date=target_date,
-        )
-        return redirect("list_goals")
-
+    goal_type = request.GET.get('type', None)
     goals = Goal.objects.all()
-    return render(
-        request,
-        'goals/list_goals.html',
-        {'goals': goals},
-    )
+    if goal_type in ['daily', 'long_term']:
+        goals = goals.filter(goal_type=goal_type)
+
+    paginator = Paginator(goals, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'goals/list_goals.html', {
+        'goals': page_obj,  # Using goals instead of page_obj for template compatibility
+        'page_obj': page_obj,
+        'goal_type_filter': goal_type,
+    })
+
+def create_goal(request):
+    if request.method == 'POST':
+        form = GoalForm(request.POST, request.FILES)
+        if form.is_valid():
+            goal = form.save(commit=False)
+            if goal.goal_type == 'long_term' and not goal.target_date:
+                form.add_error('target_date', 'Please select a target date for long-term goals.')
+            else:
+                goal.save()
+                return redirect('list_goals')
+    else:
+        form = GoalForm()
+    return render(request, 'goals/create_goal.html', {'form': form})
 def create_subgoal(request, goal_id):
 
     if request.method != "POST":

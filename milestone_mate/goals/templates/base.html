@@ -96,6 +96,28 @@
 
     .badge-completed { background: #dcfce7; color: #166534; }
     .badge-inprogress { background: #e5e7eb; color: #374151; }
+    .badge-daily { background: #DBEAFE; color: #1D4ED8; }
+    .badge-longterm { background: #D1FAE5; color: #065F46; }
+
+    .filter-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .filter-tabs .tab {
+        padding: 6px 16px;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: background 0.15s;
+    }
+    .filter-tabs .tab.active,
+    .filter-tabs .tab:hover {
+        background: var(--active-bg);
+        color: var(--text-primary);
+    }
 
     .btn-back {
       text-decoration: none;

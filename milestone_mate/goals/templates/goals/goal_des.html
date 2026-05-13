@@ -8,6 +8,11 @@
 
     <div class="detail-header">
       <h1 class="goal-detail-title">{{ goal.name }}</h1>
+      <div style="margin-bottom: 12px;">
+        <span class="badge {% if goal.goal_type == 'daily' %}badge-daily{% else %}badge-longterm{% endif %}">
+            {{ goal.get_goal_type_display }}
+        </span>
+      </div>
 
       <div>
         {% if goal.is_completed %}
@@ -18,7 +23,11 @@
       </div>
 
       <div class="goal-detail-date">
-        Due: {{ goal.target_date|date:"l, d M Y" }}
+        {% if goal.goal_type == 'daily' %}
+            Due: Today
+        {% else %}
+            Due: {{ goal.target_date|date:"l, d M Y" }}
+        {% endif %}
       </div>
 
       <div class="goal-detail-description">

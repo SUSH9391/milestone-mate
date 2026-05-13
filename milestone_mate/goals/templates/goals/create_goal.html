@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Goal{% endblock %}
+
+{% block content %}
+<div style="padding: 40px; background: #fafafa; min-height: 100vh;">
+  <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 18px; border: 1px solid #e5e7eb;">
+    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 24px;">Create New Goal</h1>
+    
+    <form method="POST" action="{% url 'create_goal' %}" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 18px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        
+        <div id="date_field_wrapper" style="display: none;">
+            <!-- Just a wrapper for the JS to target, although form.as_p outputs everything sequentially. 
+                 The JS given by the user actually targets `date_field_wrapper`, but `form.as_p` doesn't provide this wrapper. 
+                 I'll add the JS as instructed but it might be better to wrap the date input. -->
+        </div>
+
+        <button type="submit" style="background: #111827; color: white; padding: 12px 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">
+            Save Goal
+        </button>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleDateField() {
+    const type = document.getElementById('goal_type').value;
+    // Django form renders target_date in a <p>. We will find the paragraph containing it.
+    const dateInput = document.getElementById('target_date_field');
+    if(dateInput) {
+        const dateWrapper = dateInput.closest('p');
+        if(dateWrapper) {
+            dateWrapper.style.display = (type === 'long_term') ? 'block' : 'none';
+        }
+    }
+}
+// Run on page load to set initial state
+document.addEventListener('DOMContentLoaded', toggleDateField);
+</script>
+{% endblock %}

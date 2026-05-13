@@ -263,6 +263,21 @@ Goals
 
     <h1 class="gm-title">Goals</h1>
 
+    <div class="filter-tabs">
+        <a href="?type=daily"
+           class="tab {% if goal_type_filter == 'daily' %}active{% endif %}">
+            📅 Daily
+        </a>
+        <a href="?type=long_term"
+           class="tab {% if goal_type_filter == 'long_term' %}active{% endif %}">
+            🎯 Long-Term
+        </a>
+        <a href="?"
+           class="tab {% if not goal_type_filter %}active{% endif %}">
+            📋 All
+        </a>
+    </div>
+
     <div class="gm-list">
 
       {% for g in goals %}
@@ -277,6 +292,9 @@ Goals
 
           <div class="gm-titleCell">
             {{ g.name }}
+            <span class="badge {% if g.goal_type == 'daily' %}badge-daily{% else %}badge-longterm{% endif %}">
+                {{ g.get_goal_type_display }}
+            </span>
           </div>
 
           <div class="gm-descCell">
@@ -284,7 +302,11 @@ Goals
           </div>
 
           <div class="gm-dateCell">
-            {{ g.target_date }}
+            {% if g.goal_type == 'daily' %}
+                <span class="date-label">Today</span>
+            {% else %}
+                <span class="date-label">{{ g.target_date|date:"D, d M Y" }}</span>
+            {% endif %}
           </div>
 
           <div class="gm-actions">
@@ -394,9 +416,9 @@ Goals
     </div>
 
     <div class="gm-addRow">
-      <div class="gm-addBtn" id="gmOpenAdd">
+      <a href="{% url 'create_goal' %}" class="gm-addBtn" style="text-decoration: none; color: inherit;">
         ＋ Add a goal
-      </div>
+      </a>
     </div>
 
     <form class="gm-inlineForm" id="gmAddForm" method="POST">

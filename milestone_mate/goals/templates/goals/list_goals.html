@@ -409,7 +409,9 @@ Goals
 
       {% empty %}
 
-      <div class="g-goal Container"><div class="g-row"> NO goals right now!! </div></div>
+      <div class="gm-emptyState" id="emptyState" style="text-align:center; padding:40px; color:#6b7280; background:white; border:1px dashed #e5e7eb; border-radius:18px;">
+        🎉 All goals completed!
+      </div>
 
       {% endfor %}
 
@@ -582,13 +584,43 @@ document
           const data =
             await res.json();
 
-          checkbox.checked =
-            data.is_completed;
+          checkbox.checked = data.is_completed;
 
-          goalRow.style.opacity =
-            data.is_completed
-              ? "0.6"
-              : "1";
+          if (data.is_completed) {
+            const container = goalRow.closest(".gm-goalContainer");
+            if (container) {
+              container.style.transition = "transform 0.4s ease-out, opacity 0.4s ease-out";
+              container.style.transform = "translateX(100%)";
+              container.style.opacity = "0";
+              
+              setTimeout(() => {
+                container.style.transition = "height 0.3s ease, margin 0.3s ease, padding 0.3s ease, border 0.3s ease";
+                container.style.height = "0px";
+                container.style.margin = "0px";
+                container.style.padding = "0px";
+                container.style.border = "none";
+                container.style.overflow = "hidden";
+                
+                setTimeout(() => {
+                  container.remove();
+                  const listContainer = document.querySelector('.gm-list');
+                  if (listContainer && listContainer.querySelectorAll('.gm-goalContainer').length === 0) {
+                    if (!document.getElementById('emptyState')) {
+                      const emptyState = document.createElement('div');
+                      emptyState.className = 'gm-emptyState';
+                      emptyState.id = 'emptyState';
+                      emptyState.style.cssText = 'text-align:center; padding:40px; color:#6b7280; background:white; border:1px dashed #e5e7eb; border-radius:18px; opacity:0; transition:opacity 0.5s ease;';
+                      emptyState.innerHTML = '🎉 All goals completed!';
+                      listContainer.appendChild(emptyState);
+                      setTimeout(() => { emptyState.style.opacity = '1'; }, 50);
+                    }
+                  }
+                }, 300);
+              }, 400);
+            }
+          } else {
+            goalRow.style.opacity = "1";
+          }
 
         } catch (err) {
 

@@ -174,20 +174,45 @@ Home
       const longTermTotal = Number({{ long_term_total_json|safe }});
       const longTermNotCompleted = Math.max(longTermTotal - longTermCompleted, 0);
 
+      let chartData = [longTermCompleted, longTermNotCompleted];
+      let bgColors = ['rgba(22, 101, 52, 0.65)', 'rgba(107, 114, 128, 0.35)'];
+      let borderColors = ['rgba(22, 101, 52, 1)', 'rgba(107, 114, 128, 1)'];
+      let chartLabels = ['Completed', 'Not Completed'];
+
+      if (longTermTotal === 0) {
+        chartData = [1];
+        bgColors = ['rgba(229, 231, 235, 0.5)'];
+        borderColors = ['rgba(229, 231, 235, 1)'];
+        chartLabels = ['No Data'];
+      }
+
       const longTermCtx = document.getElementById('longTermCompletionChart');
       if (longTermCtx) {
         new Chart(longTermCtx, {
           type: 'doughnut',
           data: {
-            labels: ['Completed', 'Not Completed'],
+            labels: chartLabels,
             datasets: [{
-              data: [longTermCompleted, longTermNotCompleted],
-              backgroundColor: ['rgba(22, 101, 52, 0.65)', 'rgba(107, 114, 128, 0.35)'],
-              borderColor: ['rgba(22, 101, 52, 1)', 'rgba(107, 114, 128, 1)'],
+              data: chartData,
+              backgroundColor: bgColors,
+              borderColor: borderColors,
               borderWidth: 2
             }]
           },
-          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+          options: { 
+            responsive: true, 
+            plugins: { 
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (longTermTotal === 0) return 'No long-term goals yet';
+                            return context.label + ': ' + context.parsed;
+                        }
+                    }
+                }
+            } 
+          }
         });
       }
     })();

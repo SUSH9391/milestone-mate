@@ -47,7 +47,7 @@ def home(request):
 def list_goals(request):
 
     goal_type = request.GET.get('type', None)
-    goals = Goal.objects.all()
+    goals = Goal.objects.filter(is_completed=False)
     if goal_type in ['daily', 'long_term']:
         goals = goals.filter(goal_type=goal_type)
 

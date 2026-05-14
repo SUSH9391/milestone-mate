@@ -72,7 +72,22 @@ Home
       📈 Goal Analytics Dashboard
     </h2>
 
+    <div style="margin-top: 16px;">
+      <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:16px; padding:16px; max-width:1000px;">
+        <h3 style="margin:0 0 10px 0; color:#6b7280; font-size:15px;">📊 Daily completions (Last 7 days)</h3>
+        <canvas id="weeklyDailyChart" height="110"></canvas>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <div style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:16px; padding:16px; max-width:700px;">
+        <h3 style="margin:0 0 10px 0; color:#6b7280; font-size:15px;">🍩 Long-term completion</h3>
+        <canvas id="longTermCompletionChart" height="180"></canvas>
+      </div>
+    </div>
+
     <div class="analytics-grid">
+
 
       <div class="analytics-item">
 
@@ -126,9 +141,60 @@ Home
 
   </div>
 
-</div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    (function() {
+      const weeklyLabels = {{ weekly_daily_labels_json|safe }};
+      const weeklyCompleted = {{ weekly_daily_completed_json|safe }};
+
+      const weeklyCtx = document.getElementById('weeklyDailyChart');
+      if (weeklyCtx) {
+        new Chart(weeklyCtx, {
+          type: 'bar',
+          data: {
+            labels: weeklyLabels,
+            datasets: [{
+              label: 'Completed Daily Goals',
+              data: weeklyCompleted,
+              backgroundColor: 'rgba(37, 99, 235, 0.25)',
+              borderColor: 'rgba(37, 99, 235, 1)',
+              borderWidth: 2,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      }
+
+      const longTermCompleted = Number({{ long_term_completed_json|safe }});
+      const longTermTotal = Number({{ long_term_total_json|safe }});
+      const longTermNotCompleted = Math.max(longTermTotal - longTermCompleted, 0);
+
+      const longTermCtx = document.getElementById('longTermCompletionChart');
+      if (longTermCtx) {
+        new Chart(longTermCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Completed', 'Not Completed'],
+            datasets: [{
+              data: [longTermCompleted, longTermNotCompleted],
+              backgroundColor: ['rgba(22, 101, 52, 0.65)', 'rgba(107, 114, 128, 0.35)'],
+              borderColor: ['rgba(22, 101, 52, 1)', 'rgba(107, 114, 128, 1)'],
+              borderWidth: 2
+            }]
+          },
+          options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+      }
+    })();
+  </script>
 
 <style>
+
 
 .home-dashboard {
 

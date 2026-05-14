@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+  <h1 class="gm-title">Dashboard</h1>
+  <p class="gm-subtitle" style="color: var(--text-muted); margin-top: -6px;">Graphical representation of your goal progress.</p>
+
+  <div class="analytics-card" style="margin-top: 22px;">
+    <h2>📊 Weekly Daily Completion</h2>
+    <div style="max-width: 900px;">
+      <canvas id="weeklyDailyChart" height="90"></canvas>
+    </div>
+  </div>
+
+  <div class="analytics-card" style="margin-top: 22px;">
+    <h2>🍩 Long-term Completion</h2>
+    <div style="max-width: 600px;">
+      <canvas id="longTermCompletionChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="analytics-grid" style="margin-top: 22px;">
+    <div class="analytics-item">
+      <h3>Daily goals (Last 7 days)</h3>
+      <p>{{ weekly_consistency.total_daily_goals }}</p>
+      <small>{{ weekly_consistency.completed_daily_goals }} completed</small>
+    </div>
+
+    <div class="analytics-item">
+      <h3>Long-term goals</h3>
+      <p>{{ long_term_freq.total_long_term_goals }}</p>
+      <small>{{ long_term_freq.completed_long_term_goals }} completed</small>
+    </div>
+
+    <div class="analytics-item">
+      <h3>Long-term Completion Rate</h3>
+      <p>{{ completion_rate|floatformat:2 }}</p>
+      <small>0.00 - 1.00</small>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Chart.js expects valid JS literals.
+  // Views must provide these values already JSON-encoded.
+  // Use Django-provided JSON-safe strings for chart data
+const WEEKLY_DAILY_LABELS = {{ weekly_daily_labels_json|default:'[]'|safe }};
+const WEEKLY_DAILY_COMPLETED = {{ weekly_daily_completed_json|default:'[]'|safe }};
+const LONG_TERM_COMPLETED = {{ long_term_completed_json|default:0 }};
+const LONG_TERM_TOTAL = {{ long_term_total_json|default:0 }};
+</script>
+<script>
+  (function() {
+    const ctx1 = document.getElementById('weeklyDailyChart');
+    if (ctx1) {
+      new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: WEEKLY_DAILY_LABELS,
+          datasets: [{
+            label: 'Completed Daily Goals',
+            data: WEEKLY_DAILY_COMPLETED,
+            backgroundColor: 'rgba(37, 99, 235, 0.25)',
+            borderColor: 'rgba(37, 99, 235, 1)',
+            borderWidth: 2,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          scales: {
+            y: { beginAtZero: true, ticks: { precision: 0 } }
+          }
+        }
+      });
+    }
+
+    const ctx2 = document.getElementById('longTermCompletionChart');
+    if (ctx2) {
+      const completed = Number(LONG_TERM_COMPLETED) || 0;
+      const total = Number(LONG_TERM_TOTAL) || 0;
+      const notCompleted = Math.max(total - completed, 0);
+
+      new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Not Completed'],
+          datasets: [{
+            data: [completed, notCompleted],
+            backgroundColor: ['rgba(22, 101, 52, 0.65)', 'rgba(107, 114, 128, 0.35)'],
+            borderColor: ['rgba(22, 101, 52, 1)', 'rgba(107, 114, 128, 1)'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}
+

@@ -21,15 +21,25 @@ def home(request):
     long_term_freq = long_term_frequency(user_goals)
     completion_rate = long_term_completion_rate(user_goals)
 
+    # Pre-encode chart data for safe inline JS usage
+    weekly_labels = weekly_consistency.get('daily_labels', [])
+    weekly_completed = weekly_consistency.get('daily_completed_per_day', [])
+
+    context = {
+        'streak_data': streak_data,
+        'weekly_consistency': weekly_consistency,
+        'long_term_freq': long_term_freq,
+        'completion_rate': completion_rate,
+        'weekly_daily_labels_json': __import__('json').dumps(weekly_labels),
+        'weekly_daily_completed_json': __import__('json').dumps(weekly_completed),
+        'long_term_completed_json': __import__('json').dumps(long_term_freq.get('completed_long_term_goals', 0)),
+        'long_term_total_json': __import__('json').dumps(long_term_freq.get('total_long_term_goals', 0)),
+    }
+
     return render(
         request,
         'home/home.html',
-        {
-            'streak_data': streak_data,
-            'weekly_consistency': weekly_consistency,
-            'long_term_freq': long_term_freq,
-            'completion_rate': completion_rate,
-        }
+        context
     )
 
 

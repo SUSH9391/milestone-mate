@@ -17,34 +17,27 @@ def update_streak(name="global_streak"):
         completed_at=today
     ).exists()
 
-
-    if streak.last_updated == today:
-        return streak
-
     if completed_today:
-
-        if streak.last_updated == yesterday:
+        # If the streak was already updated today, don't just return—
+        # ensure it is at least 1 when there's completion today.
+        if streak.last_updated == today:
+            streak.current_streak = max(streak.current_streak, 1)
+        elif streak.last_updated == yesterday:
             streak.current_streak += 1
-
         else:
             streak.current_streak = 1
 
-        if (
-            streak.current_streak >
-            streak.longest_streak
-        ):
-            streak.longest_streak = (
-                streak.current_streak
-            )
+        streak.longest_streak = max(streak.longest_streak, streak.current_streak)
+        streak.last_updated = today
+        streak.save()
+        return streak
 
-    else:
-        streak.current_streak = 0
-
+    # No completion today => streak resets
+    streak.current_streak = 0
     streak.last_updated = today
-
     streak.save()
-
     return streak
+
 
 
 def get_streak_data(name="global_streak"):

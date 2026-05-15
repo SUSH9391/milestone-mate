@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+  {% load allauth socialaccount %}
+  <style>
+    .auth-wrap { max-width: 440px; margin: 0 auto; padding: 6rem 1.5rem; }
+    .auth-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 36px 32px; }
+    .auth-title { font-size: 28px; font-weight: 800; margin: 0 0 8px; letter-spacing: -0.02em; text-align: center; }
+    .auth-subtitle { color: var(--text-muted); font-weight: 500; margin: 0 0 28px; text-align: center; font-size: 15px; line-height: 1.5; }
+    
+    .gm-formGrid { display: flex; flex-direction: column; gap: 18px; }
+    .gm-form-group { display: flex; flex-direction: column; }
+    .gm-label { font-size: 14px; color: var(--text-primary); font-weight: 600; margin-bottom: 8px; display: block; font-family: var(--font-main); }
+    
+    .gm-formGrid input[type="text"],
+    .gm-formGrid input[type="email"],
+    .gm-formGrid input[type="password"] {
+      width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px;
+      font-family: var(--font-main); font-size: 15px; transition: all 0.2s ease;
+      background: var(--bg); color: var(--text-primary);
+    }
+    .gm-formGrid input:focus { outline: none; border-color: var(--text-primary); background: #fff; box-shadow: 0 0 0 3px rgba(26,26,26,0.1); }
+    
+    .form-actions { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .gm-primary { width: 100%; background: var(--text-primary); color: #fff; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; font-family: var(--font-main); font-size: 15px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(26,26,26,0.15); }
+    .gm-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(26,26,26,0.2); }
+    .gm-primary:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(26,26,26,0.15); }
+    
+    .social-divider { margin: 28px 0; color: var(--text-muted); font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 12px; }
+    .social-divider::before, .social-divider::after { content: ""; height: 1px; background: var(--border); flex: 1; }
+    
+    .oauth-row { display: flex; flex-direction: column; gap: 12px; }
+    .oauth-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 13px; border-radius: 12px; border: 1px solid var(--border); background: #fff; font-weight: 600; color: var(--text-primary); text-decoration: none; cursor: pointer; transition: all 0.2s ease; font-family: var(--font-main); font-size: 15px; width: 100%; }
+    .oauth-btn:hover { background: var(--hover-bg); border-color: #d1d5db; }
+    .oauth-icon { width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; }
+    
+    .allauth-errorlist { color: #b91c1c; margin: 0 0 20px; padding: 14px 16px; background: #fef2f2; border-radius: 12px; font-size: 14px; font-weight: 500; list-style: none; border: 1px solid #fecaca; }
+    .allauth-errorlist li { margin-bottom: 6px; }
+    .allauth-errorlist li:last-child { margin-bottom: 0; }
+    
+    .auth-footer { margin-top: 24px; text-align: center; font-size: 14px; color: var(--text-muted); }
+    .auth-footer a { color: var(--text-primary); font-weight: 600; text-decoration: none; margin-left: 4px; }
+    .auth-footer a:hover { text-decoration: underline; }
+  </style>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1 class="auth-title">Create an account</h1>
+      <p class="auth-subtitle">Sign up to start tracking your goals.</p>
+
+      {% if form.non_field_errors %}
+        <div class="allauth-errorlist">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      {% if form.errors and not form.non_field_errors %}
+        <ul class="allauth-errorlist">
+          {% for field in form %}
+            {% if field.errors %}
+              <li>{{ field.label }}: {{ field.errors|striptags }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      <form method="post" action="{% url 'account_signup' %}">
+        {% csrf_token %}
+
+        <div class="gm-formGrid">
+          {% for field in form %}
+            <div class="gm-form-group">
+              <label class="gm-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="gm-primary">Sign up</button>
+        </div>
+      </form>
+
+      <div class="social-divider">Or continue with</div>
+
+      <div class="oauth-row">
+        {% if socialaccount_providers %}
+          {% for provider in socialaccount_providers %}
+            {% if provider.id == 'google' %}
+              <a class="oauth-btn" href="{% provider_login_url provider.id process='login' %}">
+                <span class="oauth-icon" aria-hidden="true">
+                  <svg viewBox="0 0 48 48" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#FFC107" d="M43.6 20.4H42V20H24v8h10.6C33 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12S17.4 12 24 12c3 0 5.7 1.1 7.7 3.1l5.7-5.7C33.4 6.9 29 5 24 5 12.4 5 3 14.4 3 26s9.4 21 21 21 21-9.4 21-21c0-1.3-.1-2.3-.4-3.6z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6 4.7C14 17.5 18 15 24 15c3 0 5.7 1.1 7.7 3.1l5.7-5.7C33.4 6.9 29 5 24 5 16.9 5 10.6 9 6.3 14.7z"/>
+                    <path fill="#4CAF50" d="M24 5c5 0 9.4 1.9 12.7 5l-5.7 5.7c-2-2-4.7-3.1-7.7-3.1-6 0-10 2.5-11.7 7.4l-6-4.7C10.6 9 16.9 5 24 5z"/>
+                    <path fill="#1976D2" d="M43.6 20.4H42V20H24v8h10.6c-1.1 3.1-3.7 5.8-7.2 6.9l3.9 7.6C38.3 45.1 46 36.4 46 26c0-1.3-.1-2.3-.4-3.6z"/>
+                  </svg>
+                </span>
+                Google
+              </a>
+            {% endif %}
+
+            {% if provider.id == 'github' %}
+              <a class="oauth-btn" href="{% provider_login_url provider.id process='login' %}">
+                <span class="oauth-icon" aria-hidden="true">
+                  <svg viewBox="0 0 64 64" width="22" height="22" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#111827" d="M32 2C15.4 2 2 15.7 2 32.6c0 13.6 8.7 25.2 20.8 29.3 1.5.3 2-.7 2-1.5v-5.2c-8.5 1.9-10.4-3.7-10.4-3.7-1.4-3.5-3.4-4.4-3.4-4.4-2.8-1.9.2-1.8.2-1.8 3.1.2 4.7 3.3 4.7 3.3 2.8 4.8 7.3 3.4 9.1 2.6.3-2 .9-3.4 1.6-4.2-6.7-.8-13.7-3.4-13.7-15 0-3.3 1.1-6 2.9-8.1-.3-.8-1.3-3.9.3-8.1 0 0 2.5-.8 8.2 3.1 2.4-.7 4.9-1.1 7.4-1.1s5 .4 7.4 1.1c5.7-3.9 8.2-3.1 8.2-3.1 1.6 4.2.6 7.3.3 8.1 1.8 2.1 2.9 4.8 2.9 8.1 0 11.6-7 14.1-13.8 15 .9 1 1.7 2.9 1.7 5.8v8.6c0 .8.5 1.8 2 1.5C53.3 57.8 62 46.2 62 32.6 62 15.7 48.6 2 32 2z"/>
+                  </svg>
+                </span>
+                GitHub
+              </a>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <p class="auth-subtitle" style="margin:0;">No social providers configured.</p>
+        {% endif %}
+      </div>
+
+      <div class="auth-footer">
+        Already have an account? <a href="{% url 'account_login' %}">Sign in</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

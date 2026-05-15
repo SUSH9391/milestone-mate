@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<style>
+  .profile-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .profile-avatar {
+    width: 84px;
+    height: 84px;
+    border-radius: 9999px;
+    background: #f3f4f6;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    user-select: none;
+  }
+
+  .profile-info h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  .profile-info p {
+    margin: 0;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  }
+
+  .stat-value {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .profile-section-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .account-details {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .detail-row:first-child {
+    padding-top: 0;
+  }
+
+  .detail-label {
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 14px;
+  }
+</style>
+
+<div class="profile-wrap">
+  <div class="profile-header">
+    <div class="profile-avatar">🙂</div>
+    <div class="profile-info">
+      <h1>{{ request.user.username|default:request.user.email }}</h1>
+      <p>Member since {{ request.user.date_joined|date:"F Y" }}</p>
+    </div>
+  </div>
+
+  <h2 class="profile-section-title">Your Progress</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_goals }}</div>
+      <div class="stat-label">Total Goals</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ completed_goals }}</div>
+      <div class="stat-label">Completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">🔥 {{ streak_data.current_streak }}</div>
+      <div class="stat-label">Current Streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">👑 {{ streak_data.longest_streak }}</div>
+      <div class="stat-label">Best Streak</div>
+    </div>
+  </div>
+
+  <h2 class="profile-section-title">Account Details</h2>
+  <div class="account-details">
+    <div class="detail-row">
+      <div class="detail-label">Email Address</div>
+      <div class="detail-value">{{ request.user.email }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Username</div>
+      <div class="detail-value">{{ request.user.username }}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Date Joined</div>
+      <div class="detail-value">{{ request.user.date_joined|date:"F j, Y, g:i a" }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

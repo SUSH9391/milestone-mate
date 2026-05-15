@@ -1,7 +1,9 @@
 from django.db import models
 from datetime import date
+from django.contrib.auth.models import User
 
 class Goal(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     GOAL_TYPE_CHOICES = [
         ('daily', 'Daily'),
         ('long_term', 'Long-Term'),

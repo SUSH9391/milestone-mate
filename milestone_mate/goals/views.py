@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib.auth.decorators import login_required
 from .models import Goal, Subgoal
 from .forms import GoalForm
 from streaks.utils import get_streak_data
@@ -13,10 +14,17 @@ from dashboard.utils import (
 )
 
 
-def home(request):
-    streak_data = get_streak_data()
+def landing(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+    return render(request, 'landing.html')
 
-    user_goals = Goal.objects.all()  # replace with user-specific filtering if/when auth is added
+
+@login_required
+def home(request):
+    streak_data = get_streak_data(request.user)
+
+    user_goals = Goal.objects.filter(user=request.user)
     weekly_consistency = calculate_weekly_consistency(user_goals)
     long_term_freq = long_term_frequency(user_goals)
     completion_rate = long_term_completion_rate(user_goals)
@@ -43,11 +51,11 @@ def home(request):
     )
 
 
-
+@login_required
 def list_goals(request):
-
     goal_type = request.GET.get('type', None)
-    goals = Goal.objects.filter(is_completed=False)
+    goals = Goal.objects.filter(user=request.user, is_completed=False)
+    
     if goal_type in ['daily', 'long_term']:
         goals = goals.filter(goal_type=goal_type)
 
@@ -61,11 +69,14 @@ def list_goals(request):
         'goal_type_filter': goal_type,
     })
 
+
+@login_required
 def create_goal(request):
     if request.method == 'POST':
         form = GoalForm(request.POST, request.FILES)
         if form.is_valid():
             goal = form.save(commit=False)
+            goal.user = request.user
             if goal.goal_type == 'long_term' and not goal.target_date:
                 form.add_error('target_date', 'Please select a target date for long-term goals.')
             else:
@@ -74,8 +85,10 @@ def create_goal(request):
     else:
         form = GoalForm()
     return render(request, 'goals/create_goal.html', {'form': form})
-def create_subgoal(request, goal_id):
 
+
+@login_required
+def create_subgoal(request, goal_id):
     if request.method != "POST":
         return JsonResponse(
             {'detail': 'Method not allowed'},
@@ -84,7 +97,8 @@ def create_subgoal(request, goal_id):
 
     goal = get_object_or_404(
         Goal,
-        id=goal_id
+        id=goal_id,
+        user=request.user
     )
 
     title = request.POST.get("title")
@@ -97,17 +111,22 @@ def create_subgoal(request, goal_id):
 
     return redirect("list_goals")
 
+
+@login_required
 def delete_goal(request, goal_id):
     if request.method != "POST":
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
     goal = get_object_or_404(
         Goal, 
-        id=goal_id
-        )
+        id=goal_id,
+        user=request.user
+    )
     goal.delete()
     return redirect("list_goals")
 
+
+@login_required
 def delete_subgoal(request, subgoal_id):
     if request.method != "POST":
         return JsonResponse(
@@ -117,27 +136,25 @@ def delete_subgoal(request, subgoal_id):
 
     subgoal = get_object_or_404(
         Subgoal,
-        id=subgoal_id
+        id=subgoal_id,
+        goal__user=request.user
     )
 
     subgoal.delete()
     return redirect("list_goals")
 
+
+@login_required
 def toggle_goal(request, goal_id):
     if request.method != "POST":
         return JsonResponse({'detail': 'Method not allowed'}, status=405)
 
-    from datetime import date
-
-    goal = get_object_or_404(Goal, id=goal_id)
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
     goal.is_completed = not goal.is_completed
 
     if goal.is_completed:
-
         goal.completed_at = date.today()
-
     else:   
-
         goal.completed_at = None
 
     goal.save(
@@ -145,11 +162,12 @@ def toggle_goal(request, goal_id):
             'is_completed',
             'completed_at'
         ]
-)
+    )
     return JsonResponse({'is_completed': goal.is_completed})
 
-def toggle_subgoal(request, subgoal_id):
 
+@login_required
+def toggle_subgoal(request, subgoal_id):
     if request.method != "POST":
         return JsonResponse(
             {'detail': 'Method not allowed'},
@@ -158,7 +176,8 @@ def toggle_subgoal(request, subgoal_id):
 
     subgoal = get_object_or_404(
         Subgoal,
-        id=subgoal_id
+        id=subgoal_id,
+        goal__user=request.user
     )
 
     subgoal.is_completed = (
@@ -174,7 +193,23 @@ def toggle_subgoal(request, subgoal_id):
             subgoal.is_completed
     })
 
+
+@login_required
 def goal_detail(request, goal_id):
-    goal = get_object_or_404(Goal, id=goal_id)
+    goal = get_object_or_404(Goal, id=goal_id, user=request.user)
     return render(request, 'goals/goal_des.html', {'goal': goal})
 
+@login_required
+def profile(request):
+    user_goals = Goal.objects.filter(user=request.user)
+    total_goals = user_goals.count()
+    completed_goals = user_goals.filter(is_completed=True).count()
+    
+    streak_data = get_streak_data(request.user)
+    
+    context = {
+        'total_goals': total_goals,
+        'completed_goals': completed_goals,
+        'streak_data': streak_data,
+    }
+    return render(request, 'goals/profile.html', context)

@@ -485,9 +485,8 @@
             <span class="app-avatar-inner">🙂</span>
           </button>
           <div class="app-dropdown-menu" role="menu">
-            <a class="app-dropdown-item" href="#" role="menuitem">Rewards</a>
-            <a class="app-dropdown-item" href="#" role="menuitem">Subscription</a>
-            <a class="app-dropdown-item app-dropdown-logout" href="#" role="menuitem">Logout</a>
+            <a class="app-dropdown-item" href="{% url 'profile' %}" role="menuitem">Profile</a>
+            <a class="app-dropdown-item app-dropdown-logout" href="{% url 'account_logout' %}" role="menuitem">Logout</a>
           </div>
         </div>
 

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="landing">
+  <h1>Milestone Mate</h1>
+  <p>Plan your goals and track your progress.</p>
+
+  <div class="landing-actions">
+    <a class="btn" href="{% url 'account_login' %}">Login</a>
+    <a class="btn" href="{% url 'account_signup' %}">Sign up</a>
+  </div>
+</div>
+
+<style>
+  .landing{max-width:900px;margin:0 auto;padding:40px;text-align:center;}
+  .landing h1{font-size:42px;margin-bottom:10px;}
+  .landing p{color:#6b7280;font-size:18px;margin-bottom:26px;}
+  .landing-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-block;padding:12px 18px;background:#2563eb;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;}
+</style>
+{% endblock %}
+

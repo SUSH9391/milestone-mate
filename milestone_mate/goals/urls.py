@@ -4,7 +4,10 @@ from . import views
 
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.landing, name='landing'),
+    path('home/', views.home, name='home'),
+    path('profile/', views.profile, name='profile'),
+
     path('goals/', views.list_goals, name='list_goals'),
     path('goals/create/', views.create_goal, name='create_goal'),
     path('goals/toggle/<int:goal_id>/', views.toggle_goal, name='toggle_goal'),

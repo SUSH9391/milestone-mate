@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load allauth socialaccount %}
+
+{% block title %}{% trans "Sign Up" %}{% endblock %}
+
+{% block content %}
+<style>
+    .auth-wrap { max-width: 440px; margin: 0 auto; padding: 6rem 1.5rem; }
+    .auth-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 36px 32px; }
+    .auth-title { font-size: 28px; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.02em; text-align: center; }
+    .auth-subtitle { color: var(--text-muted); font-weight: 500; margin: 0 0 28px; text-align: center; font-size: 15px; line-height: 1.6; }
+    
+    .gm-formGrid { display: flex; flex-direction: column; gap: 18px; }
+    .gm-form-group { display: flex; flex-direction: column; }
+    .gm-label { font-size: 14px; color: var(--text-primary); font-weight: 600; margin-bottom: 8px; display: block; font-family: var(--font-main); }
+    
+    .gm-formGrid input {
+      width: 100%; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px;
+      font-family: var(--font-main); font-size: 15px; transition: all 0.2s ease;
+      background: var(--bg); color: var(--text-primary);
+    }
+    .gm-formGrid input:focus { outline: none; border-color: var(--text-primary); background: #fff; box-shadow: 0 0 0 3px rgba(26,26,26,0.1); }
+    
+    .form-actions { margin-top: 28px; display: flex; flex-direction: column; gap: 12px; }
+    .gm-primary { width: 100%; background: var(--text-primary); color: #fff; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; font-family: var(--font-main); font-size: 15px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(26,26,26,0.15); }
+    .gm-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(26,26,26,0.2); }
+    
+    .allauth-errorlist { color: #b91c1c; margin: 0 0 20px; padding: 14px 16px; background: #fef2f2; border-radius: 12px; font-size: 14px; font-weight: 500; list-style: none; border: 1px solid #fecaca; }
+</style>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1 class="auth-title">Finalize Sign Up</h1>
+        <p class="auth-subtitle">
+            {% blocktrans with provider_name=account.get_provider.name %}You are about to use your {{ provider_name }} account to login to Milestone Mate. As a final step, please provide a username.{% endblocktrans %}
+        </p>
+
+        <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+            {% csrf_token %}
+            
+            {% if form.errors %}
+                <div class="allauth-errorlist">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <div class="gm-formGrid">
+                {% for field in form %}
+                    <div class="gm-form-group">
+                        <label class="gm-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="gm-primary">{% trans "Sign Up" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -4,6 +4,7 @@
 
 {% block content %}
   {% load allauth socialaccount %}
+  {% get_providers as socialaccount_providers %}
   <style>
     .auth-wrap { max-width: 440px; margin: 0 auto; padding: 6rem 1.5rem; }
     .auth-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 36px 32px; }

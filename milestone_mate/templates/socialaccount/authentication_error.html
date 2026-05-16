@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Social Network Login Failure" %}{% endblock %}
+
+{% block content %}
+<style>
+    .auth-wrap { max-width: 440px; margin: 0 auto; padding: 6rem 1.5rem; }
+    .auth-card { background: #fff; border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); padding: 36px 32px; text-align: center; }
+    .auth-title { font-size: 28px; font-weight: 800; margin: 0 0 12px; letter-spacing: -0.02em; color: #b91c1c; }
+    .auth-subtitle { color: var(--text-muted); font-weight: 500; margin: 0 0 28px; font-size: 15px; line-height: 1.6; }
+    
+    .gm-primary { display: block; width: 100%; background: var(--text-primary); color: #fff; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-weight: 700; font-family: var(--font-main); font-size: 15px; transition: all 0.2s ease; text-decoration: none; margin-top: 20px; }
+</style>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <h1 class="auth-title">{% trans "Login Failed" %}</h1>
+        <p class="auth-subtitle">
+            {% trans "An error occurred while attempting to login via your social account." %}
+        </p>
+
+        <div class="error-details" style="padding: 12px; background: #fef2f2; border-radius: 8px; border: 1px solid #fecaca; font-size: 14px; color: #b91c1c;">
+            {{ auth_error.code }}: {{ auth_error.exception }}
+        </div>
+
+        <a href="{% url 'account_login' %}" class="gm-primary">{% trans "Back to Login" %}</a>
+    </div>
+</div>
+{% endblock %}

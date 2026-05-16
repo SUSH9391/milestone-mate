@@ -20,6 +20,7 @@ class Goal(models.Model):
     is_completed = models.BooleanField(default=False)
     completed_at = models.DateField(null=True, blank=True)
     attachment = models.FileField(upload_to='goal_attachments/', null=True, blank=True)
+    google_calendar_event_id = models.CharField(max_length=255, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.goal_type == 'daily':
